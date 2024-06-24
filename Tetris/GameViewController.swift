@@ -52,6 +52,7 @@ class GameViewController: UIViewController {
     private let maxPosX: Float = 1.6
     private let minPosX: Float = -2
     private let minPosY: Float = 0.4
+    private let maxPosY: Float = 8.0
     
     private let poolInitialCount: Int = 150
     
@@ -216,9 +217,9 @@ class GameViewController: UIViewController {
     
     private func setupDictionary() {
         // Seed keys
-        /// Increment column by 1 because `hero` block occupy 1 more column on start position, to prevent logic error when
+        /// Increment column by 1 because `hero` block occupy 2 more column on start position, to prevent logic error when
         /// running `isBlockCanBeMovedVertically()` caused by key does not exists
-        for column in 1...columnCount + 1 {
+        for column in 1...columnCount + 2 {
             for row in 1...rowCount {
                 let xPos = ((Float(row) * blockHeight) - (Float(rowCount) * 0.2)) - blockHeight
                 let yPos = Float(column) * blockHeight
@@ -228,8 +229,8 @@ class GameViewController: UIViewController {
                 let yPosRounded = setFloatPrecision(float: yPos, digitBehindComma: 1)
                 
                 let key = "\(xPosRounded),\(yPosRounded)"
-                
                 placedBlocks.updateValue(nil, forKey: key)
+                print(key)
             }
         }
     }
@@ -345,19 +346,22 @@ class GameViewController: UIViewController {
 
     private func update() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
-            guard let isBlockCanBeMovedVertically = self?.isBlockCanBeMovedVertically(), isBlockCanBeMovedVertically == true
-            else {
-                self?.placeBlockOnField()
-                self?.generateRandomBlock()
-                if self?.isGameOver() == true {
-                    self?.timer?.invalidate()
-                    print("Game Over!")
-                    return
-                }
-                return
-            }
+            guard let self = self else { return }
             
-            self?.moveBlock(.down)
+            if self.isBlockCanBeMovedVertically() {
+                self.moveBlock(.down)
+            } else {
+                self.placeBlockOnField()
+                self.generateRandomBlock() // Should check if game over before generate random block
+                
+                let isGameOver = self.isGameOver()
+                self.blockNode.isHidden = isGameOver
+                
+                if isGameOver {
+                    self.timer?.invalidate()
+                    print("Game Over!")
+                }
+            }
         })
     }
     
@@ -366,6 +370,8 @@ class GameViewController: UIViewController {
     private func generateRandomBlock() {
         guard let nextBlockType = BlockType.allCases.randomElement()
         else { return }
+        
+        blockNode.position = blockSpawnPosition
         
         blockType = nextBlockType
         
@@ -380,8 +386,6 @@ class GameViewController: UIViewController {
             block.position = SCNVector3(x: Float(pos[0]) * blockHeight, y: Float(pos[1]) * blockHeight, z: 0)
             blockNode.addChildNode(block)
         }
-        
-        blockNode.position = blockSpawnPosition
     }
     
     private func generateField() {
@@ -513,11 +517,17 @@ class GameViewController: UIViewController {
             
             let key = "\(xPos),\(yPos)"
             
-            guard let dictValue = placedBlocks[key] else {
+            if yPos < minPosY {
                 return false
             }
             
-            if dictValue != nil || yPos < minPosY {
+            guard let dictValue = placedBlocks[key] else {
+                print("key \(key) does not exists")
+                return false
+            }
+            
+            if dictValue != nil {
+                print("position: \(key), yPos < minPosY = \(yPos < minPosY), dictValue: \(String(describing: dictValue)), is not nil: \(dictValue != nil)")
                 return false
             }
         }
@@ -526,7 +536,8 @@ class GameViewController: UIViewController {
     
     private func forcedDown() {
         timer?.invalidate()
-        while isBlockCanBeMovedVertically() {
+        while true {
+            if !isBlockCanBeMovedVertically() { break }
             blockNode.position = SCNVector3(
                 x: blockNode.position.x,
                 y: blockNode.position.y - blockHeight,
@@ -623,7 +634,11 @@ class GameViewController: UIViewController {
     }
     
     private func moveBlock(x: Float, y: Float, z: Float) {
-        blockNode.runAction(SCNAction.move(by: SCNVector3(x: x, y: y, z: z), duration: TimeInterval(floatLiteral: 0.0001)))
+        blockNode.position = SCNVector3(
+            x: blockNode.position.x + x,
+            y: blockNode.position.y + y,
+            z: 0
+        )
     }
     
     private func placeBlockOnField() {
@@ -683,9 +698,10 @@ class GameViewController: UIViewController {
             }
             
             guard isRowFull else {
-                print("Row \(col)")
                 continue
             }
+            
+            print("Checking for clearance at Row \(col)")
             
             clearedLinesCount += 1
             clearanceStartIndex = min(clearanceStartIndex, col)
@@ -693,7 +709,10 @@ class GameViewController: UIViewController {
             // Clearance
             for key in keyForClearance {
                 guard let block = placedBlocks[key], let unwrappedBlock = block
-                else { break }
+                else {
+                    print("Failed to do clearance on \(key)")
+                    break
+                }
                 
                 sendToPool(node: unwrappedBlock)
                 
@@ -721,17 +740,17 @@ class GameViewController: UIViewController {
                 let keyAbove = "\(xPosRounded),\(yPosAbove)"
                 
                 // Bring down
-                guard let node = placedBlocks[keyAbove], let block = node
-                else { continue }
-                
-                block.position = SCNVector3(
-                    block.position.x,
-                    block.position.y - shiftingValue,
-                    block.position.z
-                )
-                
-                placedBlocks.updateValue(nil, forKey: keyAbove)
-                placedBlocks.updateValue(block, forKey: key)
+                if let node = placedBlocks[keyAbove], let block = node {
+                    block.position = SCNVector3(
+                        block.position.x,
+                        block.position.y - shiftingValue,
+                        block.position.z
+                    )
+                    placedBlocks.updateValue(block, forKey: key)
+                    placedBlocks.updateValue(nil, forKey: keyAbove)
+                } else {
+                    placedBlocks.updateValue(nil, forKey: key)
+                }
             }
         }
     }
@@ -746,7 +765,8 @@ class GameViewController: UIViewController {
             guard let dictValue = placedBlocks[key]
             else { continue }
             
-            if dictValue != nil {
+            if let unwrappedDictValue = dictValue {
+                print("Dict key: \(key), Value: \(unwrappedDictValue.description)")
                 return true
             }
         }
@@ -782,6 +802,25 @@ class GameViewController: UIViewController {
     @objc
     private func tapButtonDown() {
         forcedDown()
+    }
+    
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        guard let key = presses.first?.key else { return }
+        
+        switch key.keyCode {
+        case .keyboardUpArrow:
+            if isBlockCanBeRotated() {
+                rotateBlock()
+            }
+        case .keyboardDownArrow:
+            tapButtonDown()
+        case .keyboardLeftArrow:
+            tapButtonLeft()
+        case .keyboardRightArrow:
+            tapButtonRight()
+        default:
+            break
+        }
     }
 }
 
