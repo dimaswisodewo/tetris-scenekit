@@ -4,37 +4,256 @@
   <contributor>
    <authoring_tool>SceneKit Collada Exporter v1.0</authoring_tool>
   </contributor>
-  <created>2024-06-23T07:11:12Z</created>
-  <modified>2024-06-23T07:11:12Z</modified>
+  <created>2024-06-24T09:46:29Z</created>
+  <modified>2024-06-24T09:46:29Z</modified>
   <unit meter="1.000000"/>
   <up_axis>Y_UP</up_axis>
  </asset>
  <library_materials>
-  <material id="Material-material" name="Material">
-   <instance_effect url="#effect_Material-material"/>
+  <material id="Red" name="Red">
+   <instance_effect url="#effect_Red"/>
+  </material>
+  <material id="Orange" name="Orange">
+   <instance_effect url="#effect_Orange"/>
+  </material>
+  <material id="Blue" name="Blue">
+   <instance_effect url="#effect_Blue"/>
+  </material>
+  <material id="Green" name="Green">
+   <instance_effect url="#effect_Green"/>
+  </material>
+  <material id="Cyan" name="Cyan">
+   <instance_effect url="#effect_Cyan"/>
+  </material>
+  <material id="Purple" name="Purple">
+   <instance_effect url="#effect_Purple"/>
+  </material>
+  <material id="Yellow" name="Yellow">
+   <instance_effect url="#effect_Yellow"/>
   </material>
  </library_materials>
  <library_effects>
-  <effect id="effect_Material-material">
+  <effect id="effect_Red">
    <profile_COMMON>
     <technique sid="common">
-     <lambert>
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
       <diffuse>
-       <color>0.8 0.8 0.8 1</color>
+       <color>0.916167 -0.183408 -0.118476 1</color>
       </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
       <transparency>
        <float>1</float>
       </transparency>
       <index_of_refraction>
        <float>1</float>
       </index_of_refraction>
-     </lambert>
+     </phong>
     </technique>
    </profile_COMMON>
    <extra>
     <technique profile="SceneKit">
      <litPerPixel>1</litPerPixel>
-     <ambient_diffuse_lock>0</ambient_diffuse_lock>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Orange">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>0.899912 0.384978 -0.169963 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Blue">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>-0.0331679 0.111032 0.872485 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Green">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>-0.343001 0.851866 -0.256397 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Cyan">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>-0.424345 0.852885 0.844677 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Purple">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>0.571457 -0.098697 0.870537 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
+    </technique>
+   </extra>
+  </effect>
+  <effect id="effect_Yellow">
+   <profile_COMMON>
+    <technique sid="common">
+     <phong>
+      <ambient>
+       <color>0.484529 0.484529 0.484529 1</color>
+      </ambient>
+      <diffuse>
+       <color>0.841939 0.816104 -0.278177 1</color>
+      </diffuse>
+      <reflective>
+       <color>0 0 0 1</color>
+      </reflective>
+      <transparent opaque="A_ONE">
+       <color>1 1 1 1</color>
+      </transparent>
+      <transparency>
+       <float>1</float>
+      </transparency>
+      <index_of_refraction>
+       <float>1</float>
+      </index_of_refraction>
+     </phong>
+    </technique>
+   </profile_COMMON>
+   <extra>
+    <technique profile="SceneKit">
+     <litPerPixel>1</litPerPixel>
+     <ambient_diffuse_lock>1</ambient_diffuse_lock>
     </technique>
    </extra>
   </effect>
@@ -86,11 +305,11 @@
  <library_visual_scenes>
   <visual_scene id="scene6">
    <node id="Cube" name="Cube">
-    <matrix>0.2 0 0 0 0 0.2 0 0 0 0 0.2 0 0 0 0 1 </matrix>
+    <matrix>0.2 0 0 0 0 0.2 0 -2.235174e-07 0 0 0.2 0 0 0 0 1 </matrix>
     <instance_geometry url="#geometry1">
      <bind_material>
       <technique_common>
-       <instance_material symbol="geometryElement5" target="#Material-material"/>
+       <instance_material symbol="geometryElement5" target="#Red"/>
       </technique_common>
      </bind_material>
     </instance_geometry>

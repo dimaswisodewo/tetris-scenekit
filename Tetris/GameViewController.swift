@@ -43,8 +43,8 @@ class GameViewController: UIViewController {
     private var blockType: BlockType = .orangeRicky
     private var blockPosition: BlockPosition = .position1
     
-    private let rowCount: Int = 10
-    private let columnCount: Int = 20
+    private let colCount: Int = 10
+    private let rowCount: Int = 20
     
     private let fieldSpawnPosition: SCNVector3 = SCNVector3(-0.2, 0, 0)
     private let blockSpawnPosition: SCNVector3 = SCNVector3(0, 8, 0)
@@ -92,13 +92,13 @@ class GameViewController: UIViewController {
     
     // MARK: - Materials
     
-    private let orangeMat = SCNMaterial()
-    private let blueMat = SCNMaterial()
-    private let redMat = SCNMaterial()
-    private let greenMat = SCNMaterial()
-    private let cyanMat = SCNMaterial()
-    private let purpleMat = SCNMaterial()
-    private let yellowMat = SCNMaterial()
+    private var orangeMat = SCNMaterial()
+    private var blueMat = SCNMaterial()
+    private var redMat = SCNMaterial()
+    private var greenMat = SCNMaterial()
+    private var cyanMat = SCNMaterial()
+    private var purpleMat = SCNMaterial()
+    private var yellowMat = SCNMaterial()
     
     private let wallMat = SCNMaterial()
     
@@ -112,13 +112,14 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         
         // create a new scene
+//        let scene = SCNScene(named: "art.scnassets/menu-scene.scn")!
         let scene = SCNScene(named: "art.scnassets/tetris-scene.scn")!
         
         // create and add a light to the scene
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light!.type = .omni
-        lightNode.position = SCNVector3(x: 0, y: 10, z: 10)
+        lightNode.position = SCNVector3(x: 0, y: 21, z: 10)
         scene.rootNode.addChildNode(lightNode)
         
         // create and add an ambient light to the scene
@@ -133,7 +134,7 @@ class GameViewController: UIViewController {
         
         // set the scene to the view
         scnView.scene = scene
-//        scnView.allowsCameraControl = true
+        scnView.allowsCameraControl = true
         gameScene = scene
         
         gameScene.rootNode.addChildNode(blockNode)
@@ -177,14 +178,42 @@ class GameViewController: UIViewController {
     }
     
     private func setupMaterials() {
-        orangeMat.diffuse.contents = UIColor.orange
+        let blockScene = SCNScene(named: "art.scnassets/menu-scene.scn")!
         
-        blueMat.diffuse.contents = UIColor.blue
-        redMat.diffuse.contents = UIColor.red
-        greenMat.diffuse.contents = UIColor.green
-        cyanMat.diffuse.contents = UIColor.cyan
-        purpleMat.diffuse.contents = UIColor.purple
-        yellowMat.diffuse.contents = UIColor.yellow
+        if let j = blockScene.rootNode.childNode(withName: "J", recursively: false),
+           let jMat = j.geometry?.material(named: "Blue") {
+            blueMat = jMat
+        }
+        
+        if let o = blockScene.rootNode.childNode(withName: "O", recursively: false),
+           let oMat = o.geometry?.material(named: "Yellow") {
+            yellowMat = oMat
+        }
+        
+        if let t = blockScene.rootNode.childNode(withName: "T", recursively: false),
+           let tMat = t.geometry?.material(named: "Purple") {
+            purpleMat = tMat
+        }
+        
+        if let i = blockScene.rootNode.childNode(withName: "I", recursively: false),
+           let iMat = i.geometry?.material(named: "Cyan") {
+            cyanMat = iMat
+        }
+        
+        if let s = blockScene.rootNode.childNode(withName: "S", recursively: false),
+           let sMat = s.geometry?.material(named: "Green") {
+            greenMat = sMat
+        }
+        
+        if let z = blockScene.rootNode.childNode(withName: "Z", recursively: false),
+           let zMat = z.geometry?.material(named: "Red") {
+            redMat = zMat
+        }
+        
+        if let l = blockScene.rootNode.childNode(withName: "L", recursively: false),
+           let lMat = l.geometry?.material(named: "Orange") {
+            orangeMat = lMat
+        }
         
         wallMat.diffuse.contents = UIColor.darkGray
         wallMat.diffuse.intensity = 0.1
@@ -219,10 +248,10 @@ class GameViewController: UIViewController {
         // Seed keys
         /// Increment column by 1 because `hero` block occupy 2 more column on start position, to prevent logic error when
         /// running `isBlockCanBeMovedVertically()` caused by key does not exists
-        for column in 1...columnCount + 2 {
-            for row in 1...rowCount {
-                let xPos = ((Float(row) * blockHeight) - (Float(rowCount) * 0.2)) - blockHeight
-                let yPos = Float(column) * blockHeight
+        for row in 1...rowCount + 2 {
+            for col in 1...colCount {
+                let xPos = ((Float(col) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+                let yPos = Float(row) * blockHeight
                 
                 // Change into 1 digit precision floating point
                 let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
@@ -237,10 +266,10 @@ class GameViewController: UIViewController {
     
     // Generate block to fill the field to check if position is correct
     private func fillFieldWithBlocks() {
-        for column in 1...columnCount {
-            for row in 1...rowCount {
-                let xPos = ((Float(row) * blockHeight) - (Float(rowCount) * 0.2)) - blockHeight
-                let yPos = Float(column) * blockHeight
+        for row in 1...rowCount {
+            for col in 1...colCount {
+                let xPos = ((Float(col) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+                let yPos = Float(row) * blockHeight
                 
                 // Change into 1 digit precision floating point
                 let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
@@ -345,7 +374,7 @@ class GameViewController: UIViewController {
     }
 
     private func update() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
             
             if self.isBlockCanBeMovedVertically() {
@@ -373,7 +402,7 @@ class GameViewController: UIViewController {
         
         blockNode.position = blockSpawnPosition
         
-        blockType = nextBlockType
+        blockType = .hero
         
         let blockPos: [[Int]] = getBlockPosition(blockType: blockType, blockPosition: .position1) ?? smashboyPos
         blockPosition = .position1
@@ -522,12 +551,9 @@ class GameViewController: UIViewController {
             }
             
             guard let dictValue = placedBlocks[key] else {
-                print("key \(key) does not exists")
                 return false
             }
-            
             if dictValue != nil {
-                print("position: \(key), yPos < minPosY = \(yPos < minPosY), dictValue: \(String(describing: dictValue)), is not nil: \(dictValue != nil)")
                 return false
             }
         }
@@ -678,8 +704,8 @@ class GameViewController: UIViewController {
         for col in startCol...startCol + distance {
             var keyForClearance: [String] = []
             var isRowFull = true
-            for row in 1...rowCount {
-                let xPos = ((Float(row) * blockHeight) - (Float(rowCount) * 0.2)) - blockHeight
+            for row in 1...colCount {
+                let xPos = ((Float(row) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
                 let yPos = Float(col) * blockHeight
                 
                 // Change into 1 digit precision floating point
@@ -724,35 +750,72 @@ class GameViewController: UIViewController {
         print("cleared lines count: \(clearedLinesCount), clearance start index: \(clearanceStartIndex)")
         
         // Bring down blocks placed above
-        for col in clearanceStartIndex...columnCount {
-            for row in 1...rowCount {
-                let xPos = ((Float(row) * blockHeight) - (Float(rowCount) * 0.2)) - blockHeight
-                let yPos = Float(col) * blockHeight
-                
-                let shiftingValue = setFloatPrecision(float: Float(clearedLinesCount) * blockHeight, digitBehindComma: 1)
+        var bottom = clearanceStartIndex
+        var top = clearanceStartIndex + 1
+        while bottom < rowCount {
+            if top > rowCount {
+                // Out of bounds
+                return
+            }
+            guard let keys = getRowBlockKeysIfNotNil(startRow: top) else {
+                top += 1
+                continue
+            }
+            
+            // Bring down
+            for row in 1...colCount {
+                let xPos = ((Float(row) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+                let yPos = Float(bottom) * blockHeight
                 
                 // Change into 1 digit precision floating point
                 let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
                 let yPosRounded = setFloatPrecision(float: yPos, digitBehindComma: 1)
-                let yPosAbove = setFloatPrecision(float: yPos + shiftingValue, digitBehindComma: 1)
                 
                 let key = "\(xPosRounded),\(yPosRounded)"
-                let keyAbove = "\(xPosRounded),\(yPosAbove)"
+                let keyAbove = keys[row - 1]
                 
-                // Bring down
-                if let node = placedBlocks[keyAbove], let block = node {
-                    block.position = SCNVector3(
-                        block.position.x,
-                        block.position.y - shiftingValue,
-                        block.position.z
+                guard let block = placedBlocks[keyAbove] else {
+                    fatalError()
+                }
+                
+                if let unwrappedBlock = block {
+                    unwrappedBlock.position = SCNVector3(
+                        x: unwrappedBlock.position.x,
+                        y: unwrappedBlock.position.y - Float(top - bottom) * blockHeight,
+                        z: 0
                     )
-                    placedBlocks.updateValue(block, forKey: key)
-                    placedBlocks.updateValue(nil, forKey: keyAbove)
+                    placedBlocks.updateValue(unwrappedBlock, forKey: key)
                 } else {
                     placedBlocks.updateValue(nil, forKey: key)
                 }
+                
+                placedBlocks.updateValue(nil, forKey: keyAbove)
+            }
+            
+            bottom += 1
+        }
+        
+    }
+    
+    private func getRowBlockKeysIfNotNil(startRow: Int) -> [String]? {
+        var keys = [String]()
+        var isRowEmpty = true
+        for col in 1...colCount {
+            let xPos = ((Float(col) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+            let yPos = Float(startRow) * blockHeight
+            
+            // Change into 1 digit precision floating point
+            let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
+            let yPosRounded = setFloatPrecision(float: yPos, digitBehindComma: 1)
+            
+            let key = "\(xPosRounded),\(yPosRounded)"
+            keys.append(key)
+            
+            if let block = placedBlocks[key], let _ = block {
+                isRowEmpty = false
             }
         }
+        return isRowEmpty ? nil : keys
     }
     
     private func isGameOver() -> Bool {
