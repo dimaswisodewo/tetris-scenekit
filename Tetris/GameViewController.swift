@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import QuartzCore
 import SceneKit
 
 enum Direction {
@@ -402,7 +401,7 @@ class GameViewController: UIViewController {
         
         blockNode.position = blockSpawnPosition
         
-        blockType = .hero
+        blockType = nextBlockType
         
         let blockPos: [[Int]] = getBlockPosition(blockType: blockType, blockPosition: .position1) ?? smashboyPos
         blockPosition = .position1
