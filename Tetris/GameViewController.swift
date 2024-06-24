@@ -245,7 +245,7 @@ class GameViewController: UIViewController {
     
     private func setupDictionary() {
         // Seed keys
-        /// Increment column by 1 because `hero` block occupy 2 more column on start position, to prevent logic error when
+        /// Increment column by 1 because `hero` block occupy 2 more row on start position, to prevent logic error when
         /// running `isBlockCanBeMovedVertically()` caused by key does not exists
         for row in 1...rowCount + 2 {
             for col in 1...colCount {
