@@ -36,27 +36,35 @@ class GameViewController: UIViewController {
     private var timer: Timer?
     private let blockHeight: Float = 0.4
     
+    // Current game scene
+    private var gameScene: SCNScene!
+    
+    // To store blocks placed in field
     private var placedBlocks = Dictionary<String, SCNNode?>()
     
     private let blockNode: SCNNode = SCNNode()
     private var blockType: BlockType = .orangeRicky
     private var blockPosition: BlockPosition = .position1
     
+    // Field size
     private let colCount: Int = 10
     private let rowCount: Int = 20
     
+    // Spawn position
     private let fieldSpawnPosition: SCNVector3 = SCNVector3(-0.2, 0, 0)
     private let blockSpawnPosition: SCNVector3 = SCNVector3(0, 8, 0)
     
+    // Field configuration
     private let maxPosX: Float = 1.6
     private let minPosX: Float = -2
     private let minPosY: Float = 0.4
     private let maxPosY: Float = 8.0
     
+    // Object pooling
+    private var objectPool: [SCNNode] = []
     private let poolInitialCount: Int = 150
     
-    // MARK: - UI
-    
+    // UI
     private let buttonLeft: UIButton = {
         let btn = UIButton(type: .roundedRect)
         btn.setTitle("Left", for: .normal)
@@ -85,12 +93,7 @@ class GameViewController: UIViewController {
         return btn
     }()
     
-    private var gameScene: SCNScene!
-    
-    private var objectPool: [SCNNode] = []
-    
-    // MARK: - Materials
-    
+    // Materials
     private var orangeMat = SCNMaterial()
     private var blueMat = SCNMaterial()
     private var redMat = SCNMaterial()
@@ -101,8 +104,6 @@ class GameViewController: UIViewController {
     
     private let wallMat = SCNMaterial()
     
-    // MARK: - Life Cycle
-    
     deinit {
         timer?.invalidate()
     }
@@ -111,30 +112,28 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         
         // create a new scene
-//        let scene = SCNScene(named: "art.scnassets/menu-scene.scn")!
-        let scene = SCNScene(named: "art.scnassets/tetris-scene.scn")!
+        gameScene = SCNScene(named: "art.scnassets/tetris-scene.scn")!
         
         // create and add a light to the scene
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light!.type = .omni
         lightNode.position = SCNVector3(x: 0, y: 21, z: 10)
-        scene.rootNode.addChildNode(lightNode)
+        gameScene.rootNode.addChildNode(lightNode)
         
         // create and add an ambient light to the scene
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
         ambientLightNode.light!.color = UIColor.darkGray
-        scene.rootNode.addChildNode(ambientLightNode)
+        gameScene.rootNode.addChildNode(ambientLightNode)
         
         // retrieve the SCNView
         let scnView = self.view as! SCNView
         
         // set the scene to the view
-        scnView.scene = scene
+        scnView.scene = gameScene
         scnView.allowsCameraControl = true
-        gameScene = scene
         
         gameScene.rootNode.addChildNode(blockNode)
         
@@ -158,6 +157,7 @@ class GameViewController: UIViewController {
         update()
     }
     
+    // Populate object pool
     private func populatePool() {
         for _ in 0..<poolInitialCount {
             sendToPool(node: getFromPool())
@@ -220,7 +220,7 @@ class GameViewController: UIViewController {
         wallMat.isDoubleSided = true
         wallMat.blendMode = .alpha
         wallMat.shininess = 100
-        wallMat.transparency.native = 0.7
+        wallMat.transparency.native = 0.5
         wallMat.cullMode = .back
     }
     
@@ -258,7 +258,6 @@ class GameViewController: UIViewController {
                 
                 let key = "\(xPosRounded),\(yPosRounded)"
                 placedBlocks.updateValue(nil, forKey: key)
-                print(key)
             }
         }
     }
@@ -586,7 +585,6 @@ class GameViewController: UIViewController {
             
             // Cannot move right
             if dictValue != nil || xPos > maxPosX {
-                print(key)
                 return false
             }
         }
@@ -607,7 +605,6 @@ class GameViewController: UIViewController {
             
             // Cannot move left
             if dictValue != nil || xPos < minPosX {
-                print(key)
                 return false
             }
         }
@@ -688,6 +685,7 @@ class GameViewController: UIViewController {
     private func checkForClearance() {
         var minY: Float = 999
         var maxY: Float = -999
+        // Get row for clearance checking form recently placed block in field
         for block in blockNode.childNodes {
             minY = min(minY, block.worldPosition.y)
             maxY = max(maxY, block.worldPosition.y)
@@ -696,16 +694,15 @@ class GameViewController: UIViewController {
         minY = setFloatPrecision(float: minY, digitBehindComma: 1)
         maxY = setFloatPrecision(float: maxY, digitBehindComma: 1)
         
-        var clearedLinesCount: Int = 0
         var clearanceStartIndex: Int = 999
-        let startCol = max(Int(round(minY / blockHeight)), 1)  // there is something wrong with this
-        let distance = Int(round(abs(maxY - minY) / blockHeight))
-        for col in startCol...startCol + distance {
-            var keyForClearance: [String] = []
+        let startRow = max(Int(round(minY / blockHeight)), 1)  // Start row for clearance checking
+        let distance = Int(round(abs(maxY - minY) / blockHeight)) // Distance from lowest row to highest row for clearance checking
+        for row in startRow...startRow + distance {
+            var keysForClearance: [String] = []
             var isRowFull = true
-            for row in 1...colCount {
-                let xPos = ((Float(row) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
-                let yPos = Float(col) * blockHeight
+            for col in 1...colCount {
+                let xPos = ((Float(col) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+                let yPos = Float(row) * blockHeight
                 
                 // Change into 1 digit precision floating point
                 let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
@@ -719,23 +716,26 @@ class GameViewController: UIViewController {
                     break
                 }
                 
-                keyForClearance.append(key)
+                keysForClearance.append(key)
             }
             
             guard isRowFull else {
                 continue
             }
             
-            print("Checking for clearance at Row \(col)")
+#if DEBUG
+            print("Checking for clearance at Row \(row)")
+#endif
             
-            clearedLinesCount += 1
-            clearanceStartIndex = min(clearanceStartIndex, col)
+            clearanceStartIndex = min(clearanceStartIndex, row)
             
             // Clearance
-            for key in keyForClearance {
+            for key in keysForClearance {
                 guard let block = placedBlocks[key], let unwrappedBlock = block
                 else {
+#if DEBUG
                     print("Failed to do clearance on \(key)")
+#endif
                     break
                 }
                 
@@ -746,7 +746,6 @@ class GameViewController: UIViewController {
         }
         
         guard clearanceStartIndex < 999 else { return }
-        print("cleared lines count: \(clearedLinesCount), clearance start index: \(clearanceStartIndex)")
         
         // Bring down blocks placed above
         var bottom = clearanceStartIndex
@@ -796,6 +795,7 @@ class GameViewController: UIViewController {
         
     }
     
+    // Get keys of 1 row, return nil if row empty
     private func getRowBlockKeysIfNotNil(startRow: Int) -> [String]? {
         var keys = [String]()
         var isRowEmpty = true
@@ -828,14 +828,16 @@ class GameViewController: UIViewController {
             else { continue }
             
             if let unwrappedDictValue = dictValue {
+#if DEBUG
                 print("Dict key: \(key), Value: \(unwrappedDictValue.description)")
+#endif
                 return true
             }
         }
         return false
     }
     
-    // MARK: - Button Events
+    // MARK: - Button events
     
     private func setupButtonEvents() {
         buttonLeft.addTarget(self, action: #selector(tapButtonLeft), for: .touchUpInside)
@@ -866,6 +868,9 @@ class GameViewController: UIViewController {
         forcedDown()
     }
     
+    // MARK: - Keypress events
+    
+#if DEBUG
     override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
         guard let key = presses.first?.key else { return }
         
@@ -884,6 +889,7 @@ class GameViewController: UIViewController {
             break
         }
     }
+#endif
 }
 
 // MARK: - 4 type of position for each block
