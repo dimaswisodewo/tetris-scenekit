@@ -36,6 +36,24 @@ class GameViewController: UIViewController {
     private var timer: Timer?
     private let blockHeight: Float = 0.4
     
+    private var score: Int = 0 {
+        didSet {
+            scoreTextView.text = "Score: \(score)"
+        }
+    }
+    
+    private var level: Int = 0 {
+        didSet {
+            levelTextView.text = "Level: \(level)"
+            
+            // Increase block drop speed when leveled up
+            timer?.invalidate()
+            update()
+        }
+    }
+    
+    private var clearedRowsCount: Int = 0
+    
     // Current game scene
     private var gameScene: SCNScene!
     
@@ -65,6 +83,26 @@ class GameViewController: UIViewController {
     private let poolInitialCount: Int = 150
     
     // UI
+    private let scoreTextView: UITextView = {
+        let txt = UITextView()
+        txt.font = .boldSystemFont(ofSize: 24)
+        txt.textAlignment = .right
+        txt.textColor = .white
+        txt.text = "Score: 0"
+        txt.translatesAutoresizingMaskIntoConstraints = false
+        return txt
+    }()
+    
+    private let levelTextView: UITextView = {
+        let txt = UITextView()
+        txt.font = .boldSystemFont(ofSize: 24)
+        txt.textAlignment = .left
+        txt.textColor = .white
+        txt.text = "Level: 0"
+        txt.translatesAutoresizingMaskIntoConstraints = false
+        return txt
+    }()
+    
     private let buttonLeft: UIButton = {
         let btn = UIButton(type: .roundedRect)
         btn.setTitle("Left", for: .normal)
@@ -341,12 +379,27 @@ class GameViewController: UIViewController {
     // MARK: - Method
     
     private func setupUI() {
+        view.addSubview(levelTextView)
+        view.addSubview(scoreTextView)
         view.addSubview(buttonLeft)
         view.addSubview(buttonRight)
         view.addSubview(buttonUp)
         view.addSubview(buttonDown)
         
+        levelTextView.backgroundColor = .clear
+        scoreTextView.backgroundColor = .clear
+        
         NSLayoutConstraint.activate([
+            // Level text view
+            levelTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
+            levelTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            levelTextView.heightAnchor.constraint(equalToConstant: 60),
+            levelTextView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.3),
+            // Score text view
+            scoreTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
+            scoreTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scoreTextView.heightAnchor.constraint(equalToConstant: 60),
+            scoreTextView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             // Left Button
             buttonLeft.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -46),
             buttonLeft.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
@@ -372,7 +425,7 @@ class GameViewController: UIViewController {
     }
 
     private func update() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true, block: { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1 - (0.05 * Double(level)), repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
             
             if self.isBlockCanBeMovedVertically() {
@@ -685,7 +738,7 @@ class GameViewController: UIViewController {
     private func checkForClearance() {
         var minY: Float = 999
         var maxY: Float = -999
-        // Get row for clearance checking form recently placed block in field
+        // Get row for clearance checking from recently placed block in field
         for block in blockNode.childNodes {
             minY = min(minY, block.worldPosition.y)
             maxY = max(maxY, block.worldPosition.y)
@@ -695,7 +748,8 @@ class GameViewController: UIViewController {
         maxY = setFloatPrecision(float: maxY, digitBehindComma: 1)
         
         var clearanceStartIndex: Int = 999
-        let startRow = max(Int(round(minY / blockHeight)), 1)  // Start row for clearance checking
+        var numOfRowsCleared: Int = 0
+        let startRow = Int(round(minY / blockHeight))  // Start row for clearance checking
         let distance = Int(round(abs(maxY - minY) / blockHeight)) // Distance from lowest row to highest row for clearance checking
         for row in startRow...startRow + distance {
             var keysForClearance: [String] = []
@@ -722,6 +776,8 @@ class GameViewController: UIViewController {
             guard isRowFull else {
                 continue
             }
+            
+            numOfRowsCleared += 1
             
 #if DEBUG
             print("Checking for clearance at Row \(row)")
@@ -752,8 +808,19 @@ class GameViewController: UIViewController {
         var top = clearanceStartIndex + 1
         while bottom < rowCount {
             if top > rowCount {
-                // Out of bounds
-                return
+                // Out of bounds, all rows above are empty. Thus, set nil to current row, then break the loop
+                for row in 1...colCount {
+                    let xPos = ((Float(row) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
+                    let yPos = Float(bottom) * blockHeight
+                    
+                    // Change into 1 digit precision floating point
+                    let xPosRounded = setFloatPrecision(float: xPos, digitBehindComma: 1)
+                    let yPosRounded = setFloatPrecision(float: yPos, digitBehindComma: 1)
+                    
+                    let key = "\(xPosRounded),\(yPosRounded)"
+                    placedBlocks.updateValue(nil, forKey: key)
+                }
+                break
             }
             guard let keys = getRowBlockKeysIfNotNil(startRow: top) else {
                 top += 1
@@ -793,6 +860,10 @@ class GameViewController: UIViewController {
             bottom += 1
         }
         
+        // Calculate score and level
+        print("num of rows cleared: \(numOfRowsCleared)")
+        calculateScore(numOfRowsCleared: numOfRowsCleared)
+        calculateLevel()
     }
     
     // Get keys of 1 row, return nil if row empty
@@ -835,6 +906,37 @@ class GameViewController: UIViewController {
             }
         }
         return false
+    }
+    
+    /* 
+     Rules for score and level calculation based on:
+     https://en.wikipedia.org/wiki/Tetris_(NES_video_game)#:~:text=At%20level%200%2C%20a%20Tetris,a%20Tetris%20worth%201%2C200%20points.
+     */
+    
+    // Score calculation
+    private func calculateScore(numOfRowsCleared: Int) {
+        guard numOfRowsCleared > 0 else { return }
+        
+        if numOfRowsCleared == 1 {
+            score += 40 * (level + 1)
+        } else if numOfRowsCleared == 2 {
+            score += 100 * (level + 1)
+        } else if numOfRowsCleared == 3 {
+            score += 300 * (level + 1)
+        } else {
+            score += 1200 * (level + 1)
+        }
+        
+        clearedRowsCount += numOfRowsCleared
+    }
+    
+    // Should increase level for every 10 lines cleared
+    private func calculateLevel() {
+        print("all cleared rows count: \(clearedRowsCount)")
+        while clearedRowsCount >= 10 {
+            level += 1
+            clearedRowsCount -= 10
+        }
     }
     
     // MARK: - Button events
