@@ -7,6 +7,7 @@
 
 import UIKit
 import SceneKit
+import AVFoundation
 
 enum Direction {
     case left
@@ -30,6 +31,11 @@ enum BlockPosition {
     case position2
     case position3
     case position4
+}
+
+enum SFX {
+    case clearance
+    case gameOver
 }
 
 class GameViewController: UIViewController {
@@ -134,6 +140,7 @@ class GameViewController: UIViewController {
     }()
     
     private var isButtonDownDisabled = false
+    private var isOver = false
     private var isPaused = false {
         didSet {
             buttonPause.setTitle(isPaused ? "Resume" : "Pause", for: .normal)
@@ -150,6 +157,14 @@ class GameViewController: UIViewController {
     private var yellowMat = SCNMaterial()
     
     private let wallMat = SCNMaterial()
+    
+    // Sounds
+    private var bgmQueuePlayer = AVQueuePlayer()
+    private var bgmPlayerLooper: AVPlayerLooper?
+    private var sfxPlayer: AVAudioPlayer?
+    
+    private var clearSoundPath: String = ""
+    private var gameOverSoundPath: String = ""
     
     deinit {
         timer?.invalidate()
@@ -195,6 +210,7 @@ class GameViewController: UIViewController {
         setupUI()
         setupButtonEvents()
         setupMaterials()
+        setupSounds()
         
         populatePool()
         
@@ -221,6 +237,41 @@ class GameViewController: UIViewController {
         let node = objectPool.popLast() ?? getBlock()
         node.isHidden = false
         return node
+    }
+    
+    private func setupSounds() {
+        // BGM
+        if let bgmPath = Bundle.main.path(forResource: "BGM", ofType: "mp3") {
+            let bgmUrl = URL(filePath: bgmPath)
+            let playerItem = AVPlayerItem(asset: AVAsset(url: bgmUrl))
+            bgmPlayerLooper = AVPlayerLooper(player: bgmQueuePlayer, templateItem: playerItem)
+            bgmQueuePlayer.play()
+        }
+        
+        // SFX
+        if let clearPath = Bundle.main.path(forResource: "Clear", ofType: "mp3") {
+            clearSoundPath = clearPath
+        }
+        if let gameOverPath = Bundle.main.path(forResource: "GameOver", ofType: "mp3") {
+            gameOverSoundPath = gameOverPath
+        }
+    }
+    
+    private func playSFX(_ sfx: SFX) {
+        let contentUrl: URL
+        switch sfx {
+        case .clearance:
+            contentUrl = URL(filePath: clearSoundPath)
+        case .gameOver:
+            contentUrl = URL(filePath: gameOverSoundPath)
+        }
+        
+        do {
+            sfxPlayer = try AVAudioPlayer(contentsOf: contentUrl)
+            sfxPlayer?.play()
+        } catch let error {
+            print(error.localizedDescription)
+        }
     }
     
     private func setupMaterials() {
@@ -327,6 +378,36 @@ class GameViewController: UIViewController {
         }
     }
     
+    private func showGameOverAlert() {
+        let alert = UIAlertController(title: "Game Over", message: "You got \(score) points!", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Restart", style: .default, handler: { [weak self] _ in
+            // Restart
+            self?.restart()
+        }))
+        present(alert, animated: true)
+    }
+    
+    private func restart() {
+        let blocks = gameScene.rootNode.childNodes { node, _ in
+            node.name == "Cube"
+        }
+        for block in blocks {
+            sendToPool(node: block)
+        }
+        for block in blockNode.childNodes {
+            sendToPool(node: block)
+        }
+        
+        setupDictionary()
+        level = 0
+        score = 0
+        isOver = false
+        isPaused = false
+        
+        timer?.invalidate()
+        update()
+    }
+    
     private func setFloatPrecision(float: Float, digitBehindComma: Int) -> Float {
         let precisionMultiplier = Float(10 * digitBehindComma)
         let finalValue = Float(round(precisionMultiplier * float) / precisionMultiplier)
@@ -420,11 +501,13 @@ class GameViewController: UIViewController {
                 self.placeBlockOnField()
                 self.generateRandomBlock() // Should check if game over before generate random block
                 
-                let isGameOver = self.isGameOver()
-                self.blockNode.isHidden = isGameOver
+                isOver = self.isGameOver()
+                self.blockNode.isHidden = isOver
                 
-                if isGameOver {
+                if isOver {
                     self.timer?.invalidate()
+                    self.showGameOverAlert()
+                    self.playSFX(.gameOver)
                     print("Game Over!")
                 }
             }
@@ -850,6 +933,9 @@ class GameViewController: UIViewController {
         print("num of rows cleared: \(numOfRowsCleared)")
         calculateScore(numOfRowsCleared: numOfRowsCleared)
         calculateLevel()
+        
+        // Play clearance sfx
+        playSFX(.clearance)
     }
     
     // Get keys of 1 row, return nil if row empty
@@ -943,8 +1029,10 @@ class GameViewController: UIViewController {
         
         if isPaused {
             timer?.invalidate()
+            bgmQueuePlayer.pause()
         } else {
             update()
+            bgmQueuePlayer.play()
         }
     }
     
@@ -955,24 +1043,19 @@ class GameViewController: UIViewController {
     
     @objc
     private func tapButtonLeft() {
-        guard isBlockCanBeMovedLeft() else { return }
+        guard isBlockCanBeMovedLeft(), !isOver else { return }
         moveBlock(.left)
     }
     
     @objc
     private func tapButtonRight() {
-        guard isBlockCanBeMovedRight() else { return }
+        guard isBlockCanBeMovedRight(), !isOver else { return }
         moveBlock(.right)
     }
     
     @objc
-    private func tapButtonUp() {
-        moveBlock(.up)
-    }
-    
-    @objc
     private func tapButtonDown() {
-        guard !isButtonDownDisabled else { return }
+        guard !isButtonDownDisabled, !isOver else { return }
         
         forcedDown()
         isButtonDownDisabled = true
