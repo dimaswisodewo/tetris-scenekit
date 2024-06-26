@@ -17,6 +17,9 @@
 		2BCC0B1B2C2BD0FA00B4F52E /* GameOver.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B182C2BD0FA00B4F52E /* GameOver.mp3 */; };
 		2BCC0B1C2C2BD0FA00B4F52E /* Clear.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B192C2BD0FA00B4F52E /* Clear.mp3 */; };
 		2BCC0B1D2C2BD0FA00B4F52E /* BGM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B1A2C2BD0FA00B4F52E /* BGM.mp3 */; };
+		2BCC0B1F2C2C18E400B4F52E /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */; };
+		2BCC0B232C2C21D600B4F52E /* BlockPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */; };
+		2BCC0B252C2C220A00B4F52E /* GameSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B242C2C220A00B4F52E /* GameSounds.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +35,9 @@
 		2BCC0B182C2BD0FA00B4F52E /* GameOver.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = GameOver.mp3; path = ../../../../Downloads/GameOver.mp3; sourceTree = "<group>"; };
 		2BCC0B192C2BD0FA00B4F52E /* Clear.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Clear.mp3; path = ../../../../Downloads/Clear.mp3; sourceTree = "<group>"; };
 		2BCC0B1A2C2BD0FA00B4F52E /* BGM.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = BGM.mp3; path = ../../../../Downloads/BGM.mp3; sourceTree = "<group>"; };
+		2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
+		2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockPositions.swift; sourceTree = "<group>"; };
+		2BCC0B242C2C220A00B4F52E /* GameSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSounds.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,9 +73,12 @@
 				2BCC0B162C2BBB3300B4F52E /* Info.plist */,
 				2BCC0B132C2BBAD700B4F52E /* Fonts */,
 				2BCC0B172C2BD0BF00B4F52E /* Sounds */,
-				2B2F9E9D2C23F01800267E45 /* AppDelegate.swift */,
 				2B2F9E9F2C23F01800267E45 /* art.scnassets */,
+				2B2F9E9D2C23F01800267E45 /* AppDelegate.swift */,
+				2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */,
+				2BCC0B242C2C220A00B4F52E /* GameSounds.swift */,
 				2B2F9EA12C23F01800267E45 /* GameViewController.swift */,
+				2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */,
 				2B2F9EA32C23F01800267E45 /* Main.storyboard */,
 				2B2F9EA62C23F01B00267E45 /* Assets.xcassets */,
 				2B2F9EA82C23F01B00267E45 /* LaunchScreen.storyboard */,
@@ -172,7 +181,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				2B2F9EA22C23F01800267E45 /* GameViewController.swift in Sources */,
+				2BCC0B1F2C2C18E400B4F52E /* MenuViewController.swift in Sources */,
+				2BCC0B232C2C21D600B4F52E /* BlockPositions.swift in Sources */,
 				2B2F9E9E2C23F01800267E45 /* AppDelegate.swift in Sources */,
+				2BCC0B252C2C220A00B4F52E /* GameSounds.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

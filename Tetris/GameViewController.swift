@@ -7,38 +7,32 @@
 
 import UIKit
 import SceneKit
-import AVFoundation
-
-enum Direction {
-    case left
-    case right
-    case up
-    case down
-}
-
-enum BlockType: CaseIterable {
-    case orangeRicky
-    case blueRicky
-    case clevelandZ
-    case rhodeIslandZ
-    case hero
-    case teewee
-    case smashboy
-}
-
-enum BlockPosition {
-    case position1
-    case position2
-    case position3
-    case position4
-}
-
-enum SFX {
-    case clearance
-    case gameOver
-}
 
 class GameViewController: UIViewController {
+    enum Direction {
+        case left
+        case right
+        case up
+        case down
+    }
+
+    enum BlockType: CaseIterable {
+        case orangeRicky
+        case blueRicky
+        case clevelandZ
+        case rhodeIslandZ
+        case hero
+        case teewee
+        case smashboy
+    }
+
+    enum BlockPosition {
+        case position1
+        case position2
+        case position3
+        case position4
+    }
+    
     private var timer: Timer?
     private let blockHeight: Float = 0.4
     
@@ -158,14 +152,6 @@ class GameViewController: UIViewController {
     
     private let wallMat = SCNMaterial()
     
-    // Sounds
-    private var bgmQueuePlayer = AVQueuePlayer()
-    private var bgmPlayerLooper: AVPlayerLooper?
-    private var sfxPlayer: AVAudioPlayer?
-    
-    private var clearSoundPath: String = ""
-    private var gameOverSoundPath: String = ""
-    
     deinit {
         timer?.invalidate()
     }
@@ -210,7 +196,6 @@ class GameViewController: UIViewController {
         setupUI()
         setupButtonEvents()
         setupMaterials()
-        setupSounds()
         
         populatePool()
         
@@ -237,41 +222,6 @@ class GameViewController: UIViewController {
         let node = objectPool.popLast() ?? getBlock()
         node.isHidden = false
         return node
-    }
-    
-    private func setupSounds() {
-        // BGM
-        if let bgmPath = Bundle.main.path(forResource: "BGM", ofType: "mp3") {
-            let bgmUrl = URL(filePath: bgmPath)
-            let playerItem = AVPlayerItem(asset: AVAsset(url: bgmUrl))
-            bgmPlayerLooper = AVPlayerLooper(player: bgmQueuePlayer, templateItem: playerItem)
-            bgmQueuePlayer.play()
-        }
-        
-        // SFX
-        if let clearPath = Bundle.main.path(forResource: "Clear", ofType: "mp3") {
-            clearSoundPath = clearPath
-        }
-        if let gameOverPath = Bundle.main.path(forResource: "GameOver", ofType: "mp3") {
-            gameOverSoundPath = gameOverPath
-        }
-    }
-    
-    private func playSFX(_ sfx: SFX) {
-        let contentUrl: URL
-        switch sfx {
-        case .clearance:
-            contentUrl = URL(filePath: clearSoundPath)
-        case .gameOver:
-            contentUrl = URL(filePath: gameOverSoundPath)
-        }
-        
-        do {
-            sfxPlayer = try AVAudioPlayer(contentsOf: contentUrl)
-            sfxPlayer?.play()
-        } catch let error {
-            print(error.localizedDescription)
-        }
     }
     
     private func setupMaterials() {
@@ -507,8 +457,7 @@ class GameViewController: UIViewController {
                 if isOver {
                     self.timer?.invalidate()
                     self.showGameOverAlert()
-                    self.playSFX(.gameOver)
-                    print("Game Over!")
+                    playSFX(.gameOver)
                 }
             }
         })
@@ -1084,37 +1033,3 @@ class GameViewController: UIViewController {
     }
 #endif
 }
-
-// MARK: - 4 type of position for each block
-
-let orangeRickyPos = [[1, 1], [-1, 0], [0, 0], [1, 0]]
-let orangeRickyPos2 = [[0, 1], [0, 0], [0, -1], [1, -1]]
-let orangeRickyPos3 = [[-1, 0], [0, 0], [1, 0], [-1, -1]]
-let orangeRickyPos4 = [[-1, 1], [0, 1], [0, 0], [0, -1]]
-
-let blueRickyPos = [[-1, 1], [-1, 0], [0, 0], [1, 0]]
-let blueRickyPos2 = [[0, 1], [1, 1], [0, 0], [0, -1]]
-let blueRickyPos3 = [[-1, 0], [0, 0], [1, 0], [1, -1]]
-let blueRickyPos4 = [[0, 1], [0, 0], [-1, -1], [0, -1]]
-
-let clevelandZPos = [[-1, 0], [0, 0], [0, -1], [1, -1]]
-let clevelandZPos2 = [[0, 1], [0, 0], [-1, 0], [-1, -1]]
-let clevelandZPos3 = [[-1, 1], [0, 1], [0, 0], [1, 0]]
-let clevelandZPos4 = [[1, 1], [0, 0], [1, 0], [0, -1]]
-
-let rhodeIslandZPos = [[-1, -1], [0, 0], [0, -1], [1, 0]]
-let rhodeIslandZPos2 = [[-1, 1], [-1, 0], [0, 0], [0, -1]]
-let rhodeIslandZPos3 = [[-1, 0], [0, 1], [0, 0], [1, 1]]
-let rhodeIslandZPos4 = [[0, 1], [0, 0], [1, 0], [1, -1]]
-
-let heroPos = [[-1, 0], [0, 0], [1, 0], [2, 0]]
-let heroPos2 = [[0, 2], [0, 1], [0, 0], [0, -1]]
-let heroPos3 = [[-1, 1], [0, 1], [1, 1], [2, 1]]
-let heroPos4 = [[1, 2], [1, 1], [1, 0], [1, -1]]
-
-let teeweePos = [[0, 1], [0, 0], [-1, 0], [1, 0]]
-let teeweePos2 = [[0, 1], [0, 0], [1, 0], [0, -1]]
-let teeweePos3 = [[-1, 0], [0, 0], [1, 0], [0, -1]]
-let teeweePos4 = [[0, 1], [0, 0], [-1, 0], [0, -1]]
-
-let smashboyPos = [[-1, 0], [0, 0], [-1, -1], [0, -1]]
