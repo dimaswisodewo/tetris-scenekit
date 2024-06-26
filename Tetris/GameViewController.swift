@@ -78,7 +78,7 @@ class GameViewController: UIViewController {
     
     // Object pooling
     private var objectPool: [SCNNode] = []
-    private let poolInitialCount: Int = 150
+    private let poolInitialCount: Int = 200
     
     // UI
     private let scoreLabel: UILabel = {
@@ -208,7 +208,7 @@ class GameViewController: UIViewController {
     // Populate object pool
     private func populatePool() {
         for _ in 0..<poolInitialCount {
-            sendToPool(node: getFromPool())
+            sendToPool(node: getBlock())
         }
     }
     

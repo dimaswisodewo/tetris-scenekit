@@ -30,7 +30,7 @@ func setupSounds() {
     else { return }
     
     // BGM
-    let bgmUrl = URL(filePath: bgmPath)
+    let bgmUrl = URL(fileURLWithPath: bgmPath)
     let playerItem = AVPlayerItem(asset: AVAsset(url: bgmUrl))
     bgmPlayerLooper = AVPlayerLooper(player: bgmQueuePlayer, templateItem: playerItem)
     bgmQueuePlayer.play()
@@ -48,9 +48,9 @@ func playSFX(_ sfx: SFX) {
     let contentUrl: URL
     switch sfx {
     case .clearance:
-        contentUrl = URL(filePath: clearSoundPath)
+        contentUrl = URL(fileURLWithPath: clearSoundPath)
     case .gameOver:
-        contentUrl = URL(filePath: gameOverSoundPath)
+        contentUrl = URL(fileURLWithPath: gameOverSoundPath)
     }
     
     do {
