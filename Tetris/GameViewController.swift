@@ -334,6 +334,11 @@ class GameViewController: UIViewController {
             // Restart
             self?.restart()
         }))
+        alert.addAction(UIAlertAction(title: "Back to Menu", style: .destructive, handler: { [weak self] _ in
+            // Back to menu
+            self?.backToMenu()
+        }))
+        
         present(alert, animated: true)
     }
     
@@ -356,6 +361,13 @@ class GameViewController: UIViewController {
         
         timer?.invalidate()
         update()
+    }
+    
+    private func backToMenu() {
+        let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
+        let vc = storyBoard.instantiateViewController(withIdentifier: "MenuViewController")
+        let appdelegate = UIApplication.shared.delegate as! AppDelegate
+        appdelegate.window!.rootViewController = vc
     }
     
     private func setFloatPrecision(float: Float, digitBehindComma: Int) -> Float {

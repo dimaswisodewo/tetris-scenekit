@@ -43,7 +43,7 @@ func setupSounds() {
 }
 
 func playSFX(_ sfx: SFX) {
-    guard !isSoundSetupDone else { return }
+    guard isSoundSetupDone else { return }
     
     let contentUrl: URL
     switch sfx {
