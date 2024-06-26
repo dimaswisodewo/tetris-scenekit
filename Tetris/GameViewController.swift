@@ -44,8 +44,6 @@ class GameViewController: UIViewController {
     
     private var level: Int = 0 {
         didSet {
-            levelTextView.text = "Level: \(level)"
-            
             // Increase block drop speed when leveled up
             timer?.invalidate()
             update()
@@ -70,7 +68,7 @@ class GameViewController: UIViewController {
     
     // Spawn position
     private let fieldSpawnPosition: SCNVector3 = SCNVector3(-0.2, 0, 0)
-    private let blockSpawnPosition: SCNVector3 = SCNVector3(0, 8, 0)
+    private let blockSpawnPosition: SCNVector3 = SCNVector3(0, 8.8, 0)
     
     // Field configuration
     private let maxPosX: Float = 1.6
@@ -85,51 +83,46 @@ class GameViewController: UIViewController {
     // UI
     private let scoreTextView: UITextView = {
         let txt = UITextView()
-        txt.font = .boldSystemFont(ofSize: 24)
+        txt.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
         txt.textAlignment = .right
         txt.textColor = .white
         txt.text = "Score: 0"
-        txt.translatesAutoresizingMaskIntoConstraints = false
-        return txt
-    }()
-    
-    private let levelTextView: UITextView = {
-        let txt = UITextView()
-        txt.font = .boldSystemFont(ofSize: 24)
-        txt.textAlignment = .left
-        txt.textColor = .white
-        txt.text = "Level: 0"
+        txt.backgroundColor = .clear
         txt.translatesAutoresizingMaskIntoConstraints = false
         return txt
     }()
     
     private let buttonLeft: UIButton = {
         let btn = UIButton(type: .roundedRect)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Left", for: .normal)
+        btn.backgroundColor = .systemBlue
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
     private let buttonRight: UIButton = {
         let btn = UIButton(type: .roundedRect)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Right", for: .normal)
-        btn.translatesAutoresizingMaskIntoConstraints = false
-        return btn
-    }()
-    
-    private let buttonUp: UIButton = {
-        let btn = UIButton(type: .roundedRect)
-        btn.setTitle("Up", for: .normal)
+        btn.backgroundColor = .systemBlue
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
     private let buttonDown: UIButton = {
         let btn = UIButton(type: .roundedRect)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Down", for: .normal)
+        btn.backgroundColor = .systemIndigo
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
+    
+    private var isButtonDownDisabled = false
     
     // Materials
     private var orangeMat = SCNMaterial()
@@ -171,7 +164,7 @@ class GameViewController: UIViewController {
         
         // set the scene to the view
         scnView.scene = gameScene
-        scnView.allowsCameraControl = true
+        scnView.allowsCameraControl = false
         
         gameScene.rootNode.addChildNode(blockNode)
         
@@ -258,7 +251,7 @@ class GameViewController: UIViewController {
         wallMat.isDoubleSided = true
         wallMat.blendMode = .alpha
         wallMat.shininess = 100
-        wallMat.transparency.native = 0.5
+        wallMat.transparency.native = 0.7
         wallMat.cullMode = .back
     }
     
@@ -283,9 +276,9 @@ class GameViewController: UIViewController {
     
     private func setupDictionary() {
         // Seed keys
-        /// Increment row by 1 because `hero` block occupy 2 more row on start position, to prevent logic error when
+        /// Increment row by 1 because `hero` block occupy 4 more row on start position, to prevent logic error when
         /// running `isBlockCanBeMovedVertically()` caused by key does not exists
-        for row in 1...rowCount + 2 {
+        for row in 1...rowCount + 4 {
             for col in 1...colCount {
                 let xPos = ((Float(col) * blockHeight) - (Float(colCount) * 0.2)) - blockHeight
                 let yPos = Float(row) * blockHeight
@@ -326,40 +319,9 @@ class GameViewController: UIViewController {
     
     @objc
     func handleTap(_ gestureRecognize: UIGestureRecognizer) {
-//        // retrieve the SCNView
-//        let scnView = self.view as! SCNView
-//        
-//        // check what nodes are tapped
-//        let p = gestureRecognize.location(in: scnView)
-//        let hitResults = scnView.hitTest(p, options: [:])
-//        // check that we clicked on at least one object
-//        if hitResults.count > 0 {
-//            // retrieved the first clicked object
-//            let result = hitResults[0]
-//            
-//            // get its material
-//            let material = result.node.geometry!.firstMaterial!
-//            
-//            // highlight it
-//            SCNTransaction.begin()
-//            SCNTransaction.animationDuration = 0.5
-//            
-//            // on completion - unhighlight
-//            SCNTransaction.completionBlock = {
-//                SCNTransaction.begin()
-//                SCNTransaction.animationDuration = 0.5
-//                
-//                material.emission.contents = UIColor.black
-//                
-//                SCNTransaction.commit()
-//            }
-//            
-//            material.emission.contents = UIColor.red
-//            
-//            SCNTransaction.commit()
-//        }
+        gestureRecognize.cancelsTouchesInView = true
         
-        if isBlockCanBeRotated() {
+        if gestureRecognize.state == .ended && isBlockCanBeRotated() {
             rotateBlock()
         }
     }
@@ -379,54 +341,52 @@ class GameViewController: UIViewController {
     // MARK: - Method
     
     private func setupUI() {
-        view.addSubview(levelTextView)
+        let safeAreaInsets = view.safeAreaInsets
+        
+        let stackView = UIStackView()
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stackView)
+        
         view.addSubview(scoreTextView)
         view.addSubview(buttonLeft)
         view.addSubview(buttonRight)
-        view.addSubview(buttonUp)
         view.addSubview(buttonDown)
         
-        levelTextView.backgroundColor = .clear
-        scoreTextView.backgroundColor = .clear
-        
         NSLayoutConstraint.activate([
-            // Level text view
-            levelTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
-            levelTextView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            levelTextView.heightAnchor.constraint(equalToConstant: 60),
-            levelTextView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.3),
             // Score text view
-            scoreTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: 32),
+            scoreTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 42),
             scoreTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             scoreTextView.heightAnchor.constraint(equalToConstant: 60),
             scoreTextView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             // Left Button
-            buttonLeft.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -46),
-            buttonLeft.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
-            buttonLeft.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.25),
+            buttonLeft.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1 / 3),
             buttonLeft.heightAnchor.constraint(equalToConstant: 80),
-            // Up Button
-            buttonUp.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -46),
-            buttonUp.leadingAnchor.constraint(equalTo: buttonLeft.trailingAnchor, constant: 0),
-            buttonUp.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.25),
-            buttonUp.heightAnchor.constraint(equalToConstant: 80),
             // Down Button
-            buttonDown.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -46),
-            buttonDown.leadingAnchor.constraint(equalTo: buttonUp.trailingAnchor, constant: 0),
-            buttonDown.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.25),
+            buttonDown.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1 / 3),
             buttonDown.heightAnchor.constraint(equalToConstant: 80),
             // Right Button
-            buttonRight.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -46),
-            buttonRight.leadingAnchor.constraint(equalTo: buttonDown.trailingAnchor, constant: 0),
-            buttonRight.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            buttonRight.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.25),
+            buttonRight.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1 / 3),
             buttonRight.heightAnchor.constraint(equalToConstant: 80),
+        ])
+        
+        stackView.addArrangedSubview(buttonLeft)
+        stackView.addArrangedSubview(buttonDown)
+        stackView.addArrangedSubview(buttonRight)
+        
+        NSLayoutConstraint.activate([
+            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -safeAreaInsets.bottom - 32),
         ])
     }
 
     private func update() {
         timer = Timer.scheduledTimer(withTimeInterval: 1 - (0.05 * Double(level)), repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
+            
+            if isButtonDownDisabled {
+                isButtonDownDisabled = false
+            }
             
             if self.isBlockCanBeMovedVertically() {
                 self.moveBlock(.down)
@@ -944,7 +904,6 @@ class GameViewController: UIViewController {
     private func setupButtonEvents() {
         buttonLeft.addTarget(self, action: #selector(tapButtonLeft), for: .touchUpInside)
         buttonRight.addTarget(self, action: #selector(tapButtonRight), for: .touchUpInside)
-        buttonUp.addTarget(self, action: #selector(tapButtonUp), for: .touchUpInside)
         buttonDown.addTarget(self, action: #selector(tapButtonDown), for: .touchUpInside)
     }
     
@@ -967,7 +926,10 @@ class GameViewController: UIViewController {
     
     @objc
     private func tapButtonDown() {
+        guard !isButtonDownDisabled else { return }
+        
         forcedDown()
+        isButtonDownDisabled = true
     }
     
     // MARK: - Keypress events

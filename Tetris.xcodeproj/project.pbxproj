@@ -13,6 +13,7 @@
 		2B2F9EA52C23F01800267E45 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA32C23F01800267E45 /* Main.storyboard */; };
 		2B2F9EA72C23F01B00267E45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA62C23F01B00267E45 /* Assets.xcassets */; };
 		2B2F9EAA2C23F01B00267E45 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA82C23F01B00267E45 /* LaunchScreen.storyboard */; };
+		2BCC0B152C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,8 @@
 		2B2F9EA42C23F01800267E45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2B2F9EA62C23F01B00267E45 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2B2F9EA92C23F01B00267E45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "LuckiestGuy-Regular.ttf"; path = "../../../../Downloads/Luckiest_Guy/LuckiestGuy-Regular.ttf"; sourceTree = "<group>"; };
+		2BCC0B162C2BBB3300B4F52E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,6 +58,8 @@
 		2B2F9E9C2C23F01800267E45 /* Tetris */ = {
 			isa = PBXGroup;
 			children = (
+				2BCC0B162C2BBB3300B4F52E /* Info.plist */,
+				2BCC0B132C2BBAD700B4F52E /* Fonts */,
 				2B2F9E9D2C23F01800267E45 /* AppDelegate.swift */,
 				2B2F9E9F2C23F01800267E45 /* art.scnassets */,
 				2B2F9EA12C23F01800267E45 /* GameViewController.swift */,
@@ -63,6 +68,14 @@
 				2B2F9EA82C23F01B00267E45 /* LaunchScreen.storyboard */,
 			);
 			path = Tetris;
+			sourceTree = "<group>";
+		};
+		2BCC0B132C2BBAD700B4F52E /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -126,6 +139,7 @@
 				2B2F9EA02C23F01800267E45 /* art.scnassets in Resources */,
 				2B2F9EAA2C23F01B00267E45 /* LaunchScreen.storyboard in Resources */,
 				2B2F9EA72C23F01B00267E45 /* Assets.xcassets in Resources */,
+				2BCC0B152C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf in Resources */,
 				2B2F9EA52C23F01800267E45 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -292,6 +306,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L5M2V9S862;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tetris/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -320,6 +335,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L5M2V9S862;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Tetris/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
