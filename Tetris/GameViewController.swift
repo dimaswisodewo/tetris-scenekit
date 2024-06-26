@@ -38,7 +38,7 @@ class GameViewController: UIViewController {
     
     private var score: Int = 0 {
         didSet {
-            scoreTextView.text = "Score: \(score)"
+            scoreLabel.text = "Score: \(score)"
         }
     }
     
@@ -81,8 +81,8 @@ class GameViewController: UIViewController {
     private let poolInitialCount: Int = 150
     
     // UI
-    private let scoreTextView: UITextView = {
-        let txt = UITextView()
+    private let scoreLabel: UILabel = {
+        let txt = UILabel()
         txt.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
         txt.textAlignment = .right
         txt.textColor = .white
@@ -122,7 +122,23 @@ class GameViewController: UIViewController {
         return btn
     }()
     
+    private let buttonPause: UIButton = {
+        let btn = UIButton(type: .roundedRect)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.setTitleColor(.white, for: .normal)
+        btn.setTitle("Pause", for: .normal)
+        btn.configuration?.titleAlignment = .center
+        btn.backgroundColor = .systemBlue
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
     private var isButtonDownDisabled = false
+    private var isPaused = false {
+        didSet {
+            buttonPause.setTitle(isPaused ? "Resume" : "Pause", for: .normal)
+        }
+    }
     
     // Materials
     private var orangeMat = SCNMaterial()
@@ -319,6 +335,8 @@ class GameViewController: UIViewController {
     
     @objc
     func handleTap(_ gestureRecognize: UIGestureRecognizer) {
+        guard !isPaused else { return }
+        
         gestureRecognize.cancelsTouchesInView = true
         
         if gestureRecognize.state == .ended && isBlockCanBeRotated() {
@@ -347,17 +365,23 @@ class GameViewController: UIViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
         
-        view.addSubview(scoreTextView)
+        view.addSubview(buttonPause)
+        view.addSubview(scoreLabel)
         view.addSubview(buttonLeft)
         view.addSubview(buttonRight)
         view.addSubview(buttonDown)
         
         NSLayoutConstraint.activate([
-            // Score text view
-            scoreTextView.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 42),
-            scoreTextView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            scoreTextView.heightAnchor.constraint(equalToConstant: 60),
-            scoreTextView.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
+            // Pause Button
+            buttonPause.centerYAnchor.constraint(equalTo: scoreLabel.centerYAnchor, constant: -8),
+            buttonPause.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            buttonPause.widthAnchor.constraint(equalToConstant: 100),
+            buttonPause.heightAnchor.constraint(equalToConstant: 36),
+            // Score Label
+            scoreLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 36),
+            scoreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scoreLabel.heightAnchor.constraint(equalToConstant: 60),
+            scoreLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.6),
             // Left Button
             buttonLeft.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1 / 3),
             buttonLeft.heightAnchor.constraint(equalToConstant: 80),
@@ -368,6 +392,8 @@ class GameViewController: UIViewController {
             buttonRight.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 1 / 3),
             buttonRight.heightAnchor.constraint(equalToConstant: 80),
         ])
+        
+        buttonPause.layer.cornerRadius = 12
         
         stackView.addArrangedSubview(buttonLeft)
         stackView.addArrangedSubview(buttonDown)
@@ -902,9 +928,29 @@ class GameViewController: UIViewController {
     // MARK: - Button events
     
     private func setupButtonEvents() {
+        buttonPause.addTarget(self, action: #selector(tapPause), for: .touchUpInside)
         buttonLeft.addTarget(self, action: #selector(tapButtonLeft), for: .touchUpInside)
         buttonRight.addTarget(self, action: #selector(tapButtonRight), for: .touchUpInside)
         buttonDown.addTarget(self, action: #selector(tapButtonDown), for: .touchUpInside)
+    }
+    
+    private func togglePause() {
+        isPaused = !isPaused
+        
+        buttonLeft.isEnabled = !isPaused
+        buttonDown.isEnabled = !isPaused
+        buttonRight.isEnabled = !isPaused
+        
+        if isPaused {
+            timer?.invalidate()
+        } else {
+            update()
+        }
+    }
+    
+    @objc
+    private func tapPause() {
+        togglePause()
     }
     
     @objc
