@@ -450,7 +450,7 @@ class GameViewController: UIViewController {
     }
 
     private func update() {
-        timer = Timer.scheduledTimer(withTimeInterval: 1 - (0.05 * Double(level)), repeats: true, block: { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1 - (0.075 * Double(level)), repeats: true, block: { [weak self] _ in
             guard let self = self else { return }
             
             if isButtonDownDisabled {

@@ -13,13 +13,13 @@
 		2B2F9EA52C23F01800267E45 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA32C23F01800267E45 /* Main.storyboard */; };
 		2B2F9EA72C23F01B00267E45 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA62C23F01B00267E45 /* Assets.xcassets */; };
 		2B2F9EAA2C23F01B00267E45 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA82C23F01B00267E45 /* LaunchScreen.storyboard */; };
-		2BCC0B152C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */; };
-		2BCC0B1B2C2BD0FA00B4F52E /* GameOver.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B182C2BD0FA00B4F52E /* GameOver.mp3 */; };
-		2BCC0B1C2C2BD0FA00B4F52E /* Clear.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B192C2BD0FA00B4F52E /* Clear.mp3 */; };
-		2BCC0B1D2C2BD0FA00B4F52E /* BGM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 2BCC0B1A2C2BD0FA00B4F52E /* BGM.mp3 */; };
 		2BCC0B1F2C2C18E400B4F52E /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */; };
 		2BCC0B232C2C21D600B4F52E /* BlockPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */; };
 		2BCC0B252C2C220A00B4F52E /* GameSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B242C2C220A00B4F52E /* GameSounds.swift */; };
+		3823C2E82C3E9885008242D7 /* BGM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E52C3E9885008242D7 /* BGM.mp3 */; };
+		3823C2E92C3E9885008242D7 /* Clear.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E62C3E9885008242D7 /* Clear.mp3 */; };
+		3823C2EA2C3E9885008242D7 /* GameOver.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E72C3E9885008242D7 /* GameOver.mp3 */; };
+		3823C2EC2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2EB2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,14 +30,14 @@
 		2B2F9EA42C23F01800267E45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		2B2F9EA62C23F01B00267E45 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2B2F9EA92C23F01B00267E45 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "LuckiestGuy-Regular.ttf"; path = "../../../../Downloads/Luckiest_Guy/LuckiestGuy-Regular.ttf"; sourceTree = "<group>"; };
 		2BCC0B162C2BBB3300B4F52E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		2BCC0B182C2BD0FA00B4F52E /* GameOver.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = GameOver.mp3; path = ../../../../Downloads/GameOver.mp3; sourceTree = "<group>"; };
-		2BCC0B192C2BD0FA00B4F52E /* Clear.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = Clear.mp3; path = ../../../../Downloads/Clear.mp3; sourceTree = "<group>"; };
-		2BCC0B1A2C2BD0FA00B4F52E /* BGM.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = BGM.mp3; path = ../../../../Downloads/BGM.mp3; sourceTree = "<group>"; };
 		2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockPositions.swift; sourceTree = "<group>"; };
 		2BCC0B242C2C220A00B4F52E /* GameSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSounds.swift; sourceTree = "<group>"; };
+		3823C2E52C3E9885008242D7 /* BGM.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = BGM.mp3; sourceTree = "<group>"; };
+		3823C2E62C3E9885008242D7 /* Clear.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Clear.mp3; sourceTree = "<group>"; };
+		3823C2E72C3E9885008242D7 /* GameOver.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = GameOver.mp3; sourceTree = "<group>"; };
+		3823C2EB2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LuckiestGuy-Regular.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +89,7 @@
 		2BCC0B132C2BBAD700B4F52E /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
-				2BCC0B142C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf */,
+				3823C2EB2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -97,9 +97,9 @@
 		2BCC0B172C2BD0BF00B4F52E /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
-				2BCC0B1A2C2BD0FA00B4F52E /* BGM.mp3 */,
-				2BCC0B192C2BD0FA00B4F52E /* Clear.mp3 */,
-				2BCC0B182C2BD0FA00B4F52E /* GameOver.mp3 */,
+				3823C2E52C3E9885008242D7 /* BGM.mp3 */,
+				3823C2E62C3E9885008242D7 /* Clear.mp3 */,
+				3823C2E72C3E9885008242D7 /* GameOver.mp3 */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -164,11 +164,11 @@
 			files = (
 				2B2F9EA02C23F01800267E45 /* art.scnassets in Resources */,
 				2B2F9EAA2C23F01B00267E45 /* LaunchScreen.storyboard in Resources */,
-				2BCC0B1C2C2BD0FA00B4F52E /* Clear.mp3 in Resources */,
-				2BCC0B1D2C2BD0FA00B4F52E /* BGM.mp3 in Resources */,
+				3823C2EC2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf in Resources */,
+				3823C2EA2C3E9885008242D7 /* GameOver.mp3 in Resources */,
+				3823C2E92C3E9885008242D7 /* Clear.mp3 in Resources */,
 				2B2F9EA72C23F01B00267E45 /* Assets.xcassets in Resources */,
-				2BCC0B152C2BBAF700B4F52E /* LuckiestGuy-Regular.ttf in Resources */,
-				2BCC0B1B2C2BD0FA00B4F52E /* GameOver.mp3 in Resources */,
+				3823C2E82C3E9885008242D7 /* BGM.mp3 in Resources */,
 				2B2F9EA52C23F01800267E45 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
