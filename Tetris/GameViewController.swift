@@ -68,7 +68,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     // Logical Grid
     private var board: [GridPosition: SCNNode] = [:]
+    private var bag: [BlockType] = []
     private var activeBlockType: BlockType = .orangeRicky
+    private var nextBlockType: BlockType!
     private var activeBlockRotation: BlockPosition = .position1
     private var activeBlockGridPos = GridPosition(col: 0, row: 0)
     
@@ -76,6 +78,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     private var gameScene: SCNScene!
     private let boardNode = SCNNode()
     private let activeBlockNode = SCNNode()
+    private let nextBlockNode = SCNNode()
     private var objectPool: [SCNNode] = []
     private let poolInitialCount = 200
     
@@ -185,7 +188,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     private func restart() {
         board.values.forEach { sendToPool(node: $0) }
         activeBlockNode.childNodes.forEach { sendToPool(node: $0) }
+        nextBlockNode.childNodes.forEach { sendToPool(node: $0) }
         board.removeAll()
+        bag.removeAll()
         score = 0
         level = 0
         totalLinesCleared = 0
@@ -194,6 +199,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         isOver = false
         isPaused = false
         activeBlockNode.isHidden = false
+        nextBlockType = getNextBlockType()
         generateRandomBlock()
     }
     
@@ -278,8 +284,17 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         }
     }
 
+    private func getNextBlockType() -> BlockType {
+        if bag.isEmpty {
+            bag = BlockType.allCases.shuffled()
+        }
+        return bag.removeFirst()
+    }
+
     private func generateRandomBlock() {
-        activeBlockType = BlockType.allCases.randomElement()!
+        activeBlockType = nextBlockType
+        nextBlockType = getNextBlockType()
+        
         activeBlockRotation = .position1
         activeBlockGridPos = blockSpawnGridPos
         
@@ -292,6 +307,20 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             activeBlockNode.addChildNode(node)
         }
         moveActiveBlock(to: activeBlockGridPos)
+        updateNextBlockDisplay()
+    }
+
+    private func updateNextBlockDisplay() {
+        nextBlockNode.childNodes.forEach { sendToPool(node: $0) }
+        let material = getMaterial(blockType: nextBlockType)
+        let localPositions = nextBlockType.positions(for: .position1)
+        
+        for pos in localPositions {
+            let node = getFromPool()
+            node.geometry?.materials = [material]
+            node.position = SCNVector3(Float(pos.col) * blockHeight, Float(pos.row) * blockHeight, 0)
+            nextBlockNode.addChildNode(node)
+        }
     }
 
     private func placeBlockOnField() {
@@ -360,6 +389,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
                 boardNode.scale = SCNVector3(0.3, 0.3, 0.3)
                 boardNode.isHidden = false
                 gameState = .playing
+                instructionLabel.isHidden = true
                 restart()
             }
             return
@@ -483,6 +513,18 @@ private extension GameViewController {
         
         gameScene.rootNode.addChildNode(boardNode)
         boardNode.addChildNode(activeBlockNode)
+        boardNode.addChildNode(nextBlockNode)
+        nextBlockNode.position = SCNVector3(3.0, 6.0, 0)
+        nextBlockNode.scale = SCNVector3(1, 1, 1)
+        
+        // Add "NEXT" 3D Text above the next block
+        let textGeometry = SCNText(string: "NEXT", extrusionDepth: 0.1)
+        textGeometry.font = UIFont(name: "LuckiestGuy-Regular", size: 1.0)
+        textGeometry.firstMaterial?.diffuse.contents = UIColor.white
+        let textNode = SCNNode(geometry: textGeometry)
+        textNode.position = SCNVector3(2.5, 6.5, 0)
+        textNode.scale = SCNVector3(0.5, 0.5, 0.5)
+        boardNode.addChildNode(textNode)
         
         arView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap(_:))))
         arView.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:))))
@@ -511,7 +553,7 @@ private extension GameViewController {
             buttonLock.widthAnchor.constraint(equalToConstant: 100),
             buttonLock.heightAnchor.constraint(equalToConstant: 36),
             
-            scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 36),
+            scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0),
             scoreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             scoreLabel.heightAnchor.constraint(equalToConstant: 60),
             
@@ -522,7 +564,7 @@ private extension GameViewController {
             
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -32),
+            stack.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0),
             stack.heightAnchor.constraint(equalToConstant: 80)
         ])
         
