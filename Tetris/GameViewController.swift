@@ -180,7 +180,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         let btn = UIButton(type: .roundedRect)
         btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
         btn.setTitleColor(.white, for: .normal)
-        btn.setTitle("Lock", for: .normal)
+        btn.setTitle("Lock Board", for: .normal)
         btn.backgroundColor = .systemGreen
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
@@ -631,7 +631,7 @@ private extension GameViewController {
             
             buttonLock.topAnchor.constraint(equalTo: buttonPause.bottomAnchor, constant: 12),
             buttonLock.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            buttonLock.widthAnchor.constraint(equalToConstant: 100),
+            buttonLock.widthAnchor.constraint(equalToConstant: 160),
             buttonLock.heightAnchor.constraint(equalToConstant: 36),
             
             scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0),
