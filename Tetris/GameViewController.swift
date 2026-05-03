@@ -45,6 +45,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     private var initialEulerY: Float = 0
     private var lastUpdateTime: TimeInterval = 0
     private var fallAccumulator: TimeInterval = 0 // Tracks time elapsed since last gravity drop
+    private var lockDelayAccumulator: TimeInterval = 0 // Tracks time the piece has been resting on a surface
+    private var isLocking = false // Indicates if the active block is currently in lock delay
     private var score = 0 { didSet { scoreLabel.text = "Score: \(score)" } }
     private var level = 0
     private var totalLinesCleared = 0
@@ -198,6 +200,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         totalLinesCleared = 0
         lastUpdateTime = 0
         fallAccumulator = 0
+        lockDelayAccumulator = 0
+        isLocking = false
         isOver = false
         isPaused = false
         activeBlockNode.isHidden = false
@@ -221,6 +225,34 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             return
         }
         
+        // Handle lock delay independently of gravity
+        if isLocking {
+            lockDelayAccumulator += deltaTime
+            if lockDelayAccumulator >= 0.5 {
+                DispatchQueue.main.async {
+                    // Final check: can it still NOT move down?
+                    if !self.canMove(to: GridPosition(col: self.activeBlockGridPos.col, row: self.activeBlockGridPos.row - 1), rotation: self.activeBlockRotation) {
+                        self.placeBlockOnField()
+                        self.generateRandomBlock()
+                        self.isLocking = false
+                        self.lockDelayAccumulator = 0
+                        self.fallAccumulator = 0 // Reset gravity for the new block
+                        
+                        if self.isGameOver() {
+                            self.isOver = true
+                            self.activeBlockNode.isHidden = true
+                            self.showGameOverAlert()
+                            playSFX(.gameOver)
+                        }
+                    } else {
+                        // It can move now (slid off ledge), cancel locking
+                        self.isLocking = false
+                        self.lockDelayAccumulator = 0
+                    }
+                }
+            }
+        }
+        
         // Handle gravity (automatic falling)
         fallAccumulator += deltaTime
         let currentFallSpeed = max(0.1, 1.0 * pow(0.85, Double(level)))
@@ -232,17 +264,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
                 // Try to move down
                 if self.canMove(to: GridPosition(col: self.activeBlockGridPos.col, row: self.activeBlockGridPos.row - 1), rotation: self.activeBlockRotation) {
                     self.moveActiveBlock(to: GridPosition(col: self.activeBlockGridPos.col, row: self.activeBlockGridPos.row - 1))
+                    // Successfully moved down, so we are no longer resting on a surface
+                    self.isLocking = false
+                    self.lockDelayAccumulator = 0
                 } else {
-                    // Cannot move down, so place the block
-                    self.placeBlockOnField()
-                    self.generateRandomBlock()
-                    
-                    // Check for Game Over (newly spawned block is blocked)
-                    if self.isGameOver() {
-                        self.isOver = true
-                        self.activeBlockNode.isHidden = true
-                        self.showGameOverAlert()
-                        playSFX(.gameOver)
+                    // Cannot move down, so we start/continue the locking phase
+                    if !self.isLocking {
+                        self.isLocking = true
+                        self.lockDelayAccumulator = 0
                     }
                 }
             }
@@ -496,7 +525,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    /// Hard drop: moves the block to the lowest possible position immediately.
+    /// Hard drop: moves the block to the lowest possible position immediately and starts the lock delay.
     @objc private func tapButtonDown() {
         guard !isOver, !isPaused else { return }
         var nextPos = activeBlockGridPos
@@ -505,6 +534,10 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             score += 1 // Bonus points for hard drop
         }
         moveActiveBlock(to: nextPos)
+        
+        // Start the locking phase instead of instant lock
+        isLocking = true
+        lockDelayAccumulator = 0
     }
 
     #if DEBUG
