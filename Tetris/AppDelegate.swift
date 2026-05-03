@@ -7,6 +7,8 @@
 
 import UIKit
 
+/// Entry point for the application.
+/// Manages high-level application lifecycle events.
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 

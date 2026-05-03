@@ -5,43 +5,56 @@
 //  Created by Meynabel Dimas Wisodewo on 6/26/24.
 //
 
+// MARK: - Game Sound Management
+// This file handles the setup and playback of background music (BGM) and sound effects (SFX).
+
 import Foundation
 import AVFoundation
 
+/// Types of sound effects available in the game.
 enum SFX {
-    case clearance
-    case gameOver
+    case clearance  // Played when a row is cleared
+    case gameOver   // Played when the game ends
 }
 
+// Global player instances
 var bgmQueuePlayer = AVQueuePlayer()
 var bgmPlayerLooper: AVPlayerLooper? = nil
 var sfxPlayer: AVAudioPlayer? = nil
 var isSoundSetupDone = false
 
+// Paths to sound files
 var clearSoundPath: String = ""
 var gameOverSoundPath: String = ""
 
+/// Initializes the sound system, loads audio files, and starts BGM.
 func setupSounds() {
     guard !isSoundSetupDone else { return }
     
+    // Locate sound resources in the main bundle
     guard let bgmPath = Bundle.main.path(forResource: "BGM", ofType: "mp3"),
           let clearPath = Bundle.main.path(forResource: "Clear", ofType: "mp3"),
           let gameOverPath = Bundle.main.path(forResource: "GameOver", ofType: "mp3")
-    else { return }
+    else {
+        print("Error: Could not find sound files in bundle.")
+        return
+    }
     
-    // BGM
+    // Setup and start looping Background Music
     let bgmUrl = URL(fileURLWithPath: bgmPath)
     let playerItem = AVPlayerItem(asset: AVAsset(url: bgmUrl))
     bgmPlayerLooper = AVPlayerLooper(player: bgmQueuePlayer, templateItem: playerItem)
     bgmQueuePlayer.play()
     
-    // SFX
+    // Store paths for SFX
     clearSoundPath = clearPath
     gameOverSoundPath = gameOverPath
     
     isSoundSetupDone = true
 }
 
+/// Plays a specific sound effect.
+/// - Parameter sfx: The sound effect to play.
 func playSFX(_ sfx: SFX) {
     guard isSoundSetupDone else { return }
     
@@ -54,9 +67,10 @@ func playSFX(_ sfx: SFX) {
     }
     
     do {
+        // Create a new player for the SFX and play it
         sfxPlayer = try AVAudioPlayer(contentsOf: contentUrl)
         sfxPlayer?.play()
     } catch let error {
-        print(error.localizedDescription)
+        print("SFX Playback Error: \(error.localizedDescription)")
     }
 }

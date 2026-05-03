@@ -8,11 +8,14 @@
 import UIKit
 import SceneKit
 
+/// The initial screen of the game.
+/// Displays a rotating 3D Tetris scene and a "Play" button.
 class MenuViewController: UIViewController {
 
     private var gameScene: SCNScene!
     
-    // UI
+    // MARK: - UI Elements
+    
     private let titleLabel: UILabel = {
         let txt = UILabel()
         txt.font = UIFont(name: "LuckiestGuy-Regular", size: 60)
@@ -34,13 +37,15 @@ class MenuViewController: UIViewController {
         return btn
     }()
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // create a new scene
+        // Load the 3D menu background scene
         gameScene = SCNScene(named: "art.scnassets/menu-scene.scn")!
         
-        // create and add a light to the scene
+        // Setup lighting for the menu scene
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light!.type = .directional
@@ -54,14 +59,13 @@ class MenuViewController: UIViewController {
         lightNode.eulerAngles = SCNVector3(-Float.pi / 3, Float.pi / 4, 0)
         gameScene.rootNode.addChildNode(lightNode)
         
-        // create and add an ambient light to the scene
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
         ambientLightNode.light!.color = UIColor(white: 0.4, alpha: 1.0)
         gameScene.rootNode.addChildNode(ambientLightNode)
         
-        // Upgrade materials to PBR
+        // Enhance materials with PBR (Physically Based Rendering) for a modern look
         gameScene.rootNode.enumerateChildNodes { (node, _) in
             node.geometry?.materials.forEach { material in
                 material.lightingModel = .physicallyBased
@@ -70,24 +74,23 @@ class MenuViewController: UIViewController {
             }
         }
         
-        // retrieve the SCNView
+        // Configure the SCNView
         let scnView = self.view as! SCNView
-        
-        // set the scene to the view
         scnView.scene = gameScene
         scnView.allowsCameraControl = false
-        
-        // configure the view
         scnView.backgroundColor = UIColor.black
         
+        // Start the rotating camera effect
         rotateMenuCamera()
         
         setupUI()
         setupButtonEvents()
         
+        // Initialize background music
         setupSounds()
     }
     
+    /// Animates the camera to rotate continuously around the scene's center.
     private func rotateMenuCamera() {
         let cam = gameScene.rootNode.childNode(withName: "cameraParent", recursively: false)
         cam?.runAction(
@@ -95,12 +98,13 @@ class MenuViewController: UIViewController {
                 .rotate(
                     by: 360,
                     around: SCNVector3(0, 1, 0),
-                    duration: .init(integerLiteral: 1000)
+                    duration: 1000 // Slow rotation
                 )
             )
         )
     }
     
+    /// Layout the title and play button.
     private func setupUI() {
         let safeAreaInsets = view.safeAreaInsets
         
@@ -108,10 +112,10 @@ class MenuViewController: UIViewController {
         view.addSubview(buttonPlay)
         
         NSLayoutConstraint.activate([
-            // Title
+            // Title: Positioned near the top
             titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 80),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
-            // Button Play
+            // Play Button: Stretches across the bottom
             buttonPlay.heightAnchor.constraint(equalToConstant: 80),
             buttonPlay.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
             buttonPlay.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
@@ -123,12 +127,15 @@ class MenuViewController: UIViewController {
         buttonPlay.addTarget(self, action: #selector(onTapPlay), for: .touchUpInside)
     }
     
+    /// Transitions from the menu to the main game view.
     @objc
     private func onTapPlay() {
         buttonPlay.isEnabled = false
         
+        // Play sound effect on interaction
         playSFX(.clearance)
         
+        // Brief delay for the sound to play before transitioning
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let storyBoard : UIStoryboard = UIStoryboard(name: "Main", bundle:nil)
             let vc = storyBoard.instantiateViewController(withIdentifier: "GameViewController")
