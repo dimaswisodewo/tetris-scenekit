@@ -20,39 +20,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         case left, right, up, down
     }
 
-    /// The seven standard Tetris block types (Tetrominoes).
-    enum BlockType: CaseIterable {
-        case orangeRicky, blueRicky, clevelandZ, rhodeIslandZ, hero, teewee, smashboy
-        
-        /// Returns the relative grid positions for the block based on its current rotation state.
-        func positions(for state: BlockPosition) -> [GridPosition] {
-            let coords: [[Int]]
-            switch self {
-            case .orangeRicky: coords = [orangeRickyPos, orangeRickyPos2, orangeRickyPos3, orangeRickyPos4][state.rawValue]
-            case .blueRicky: coords = [blueRickyPos, blueRickyPos2, blueRickyPos3, blueRickyPos4][state.rawValue]
-            case .clevelandZ: coords = [clevelandZPos, clevelandZPos2, clevelandZPos3, clevelandZPos4][state.rawValue]
-            case .rhodeIslandZ: coords = [rhodeIslandZPos, rhodeIslandZPos2, rhodeIslandZPos3, rhodeIslandZPos4][state.rawValue]
-            case .hero: coords = [heroPos, heroPos2, heroPos3, heroPos4][state.rawValue]
-            case .teewee: coords = [teeweePos, teeweePos2, teeweePos3, teeweePos4][state.rawValue]
-            case .smashboy: coords = [smashboyPos, smashboyPos, smashboyPos, smashboyPos][state.rawValue]
-            }
-            return coords.map { GridPosition(col: $0[0], row: $0[1]) }
-        }
-    }
-
-    /// The four possible rotation states for a block.
-    enum BlockPosition: Int, CaseIterable {
-        case position1 = 0, position2, position3, position4
-        
-        /// Cycles to the next rotation state.
-        var next: BlockPosition { BlockPosition(rawValue: (self.rawValue + 1) % 4) ?? .position1 }
-    }
-
-    /// Represents a coordinate in the Tetris grid.
-    struct GridPosition: Hashable {
-        var col, row: Int
-    }
-    
     /// Possible states for the AR game session.
     enum GameState {
         case tracking  // Searching for a flat surface
@@ -112,9 +79,9 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     private let scoreLabel: UILabel = {
         let txt = UILabel()
-        txt.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        txt.font = UIFont(name: "LuckiestGuy-Regular", size: 32)
         txt.textAlignment = .right
-        txt.textColor = .white
+        txt.textColor = UIColor.white
         txt.text = "Score: 0"
         txt.backgroundColor = .clear
         txt.translatesAutoresizingMaskIntoConstraints = false
@@ -123,11 +90,11 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     
     private let instructionLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: "LuckiestGuy-Regular", size: 18)
+        label.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
         label.textColor = .white
         label.textAlignment = .center
-        label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        label.layer.cornerRadius = 12
+        label.backgroundColor = UIColor(red: 0.1, green: 0.1, blue: 0.2, alpha: 0.9) // Solid-ish dark blue
+        label.layer.cornerRadius = 16
         label.clipsToBounds = true
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Initializing AR..."
@@ -141,6 +108,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Left", for: .normal)
         btn.backgroundColor = .systemBlue
+        btn.layer.cornerRadius = 16
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -151,6 +119,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Right", for: .normal)
         btn.backgroundColor = .systemBlue
+        btn.layer.cornerRadius = 16
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -161,27 +130,29 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Down", for: .normal)
         btn.backgroundColor = .systemIndigo
+        btn.layer.cornerRadius = 16
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
     private let buttonPause: UIButton = {
         let btn = UIButton(type: .roundedRect)
-        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 18)
         btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Pause", for: .normal)
-        btn.configuration?.titleAlignment = .center
         btn.backgroundColor = .systemBlue
+        btn.layer.cornerRadius = 12
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
     
     private let buttonLock: UIButton = {
         let btn = UIButton(type: .roundedRect)
-        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 18)
         btn.setTitleColor(.white, for: .normal)
         btn.setTitle("Lock Board", for: .normal)
         btn.backgroundColor = .systemGreen
+        btn.layer.cornerRadius = 12
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -563,7 +534,8 @@ private extension GameViewController {
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light!.type = .directional
-        lightNode.light!.intensity = 1000
+        lightNode.light!.intensity = 700 // Reduced intensity
+        lightNode.light!.color = UIColor(red: 0.8, green: 0.9, blue: 1.0, alpha: 1.0) // Pale cyan tone
         lightNode.light!.castsShadow = true
         lightNode.light!.shadowMode = .deferred
         lightNode.light!.shadowSampleCount = 16
@@ -572,14 +544,31 @@ private extension GameViewController {
         lightNode.position = SCNVector3(x: 0, y: 10, z: 10)
         lightNode.eulerAngles = SCNVector3(-Float.pi / 3, Float.pi / 4, 0)
         gameScene.rootNode.addChildNode(lightNode)
-        
+
         // Ambient light for general visibility
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
-        ambientLightNode.light!.color = UIColor(white: 0.4, alpha: 1.0)
+        // Dim indigo ambient to allow neon blocks to pop
+        ambientLightNode.light!.color = UIColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)
         gameScene.rootNode.addChildNode(ambientLightNode)
-        
+
+        // Add colored accent lights for a cyberpunk feel
+        let magentaLight = SCNNode()
+        magentaLight.light = SCNLight()
+        magentaLight.light!.type = .omni
+        magentaLight.light!.color = UIColor.magenta
+        magentaLight.light!.intensity = 400
+        magentaLight.position = SCNVector3(x: -5, y: 5, z: 5)
+        gameScene.rootNode.addChildNode(magentaLight)
+
+        let cyanLight = SCNNode()
+        cyanLight.light = SCNLight()
+        cyanLight.light!.type = .omni
+        cyanLight.light!.color = UIColor.cyan
+        cyanLight.light!.intensity = 400
+        cyanLight.position = SCNVector3(x: 5, y: 5, z: 2)
+        gameScene.rootNode.addChildNode(cyanLight)        
         let arView = self.view as! ARSCNView
         arView.scene = gameScene
         arView.delegate = self
@@ -617,6 +606,7 @@ private extension GameViewController {
         let stack = UIStackView(arrangedSubviews: [buttonLeft, buttonDown, buttonRight])
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.distribution = .fillEqually
+        stack.spacing = 16 // Increased spacing between control buttons
         view.addSubview(stack)
         view.addSubview(buttonPause)
         view.addSubview(buttonLock)
@@ -624,34 +614,32 @@ private extension GameViewController {
         view.addSubview(instructionLabel)
         
         NSLayoutConstraint.activate([
-            buttonPause.centerYAnchor.constraint(equalTo: scoreLabel.centerYAnchor, constant: -8),
+            buttonPause.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 16),
             buttonPause.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             buttonPause.widthAnchor.constraint(equalToConstant: 100),
-            buttonPause.heightAnchor.constraint(equalToConstant: 36),
+            buttonPause.heightAnchor.constraint(equalToConstant: 44), // Increased height for better touch target
             
             buttonLock.topAnchor.constraint(equalTo: buttonPause.bottomAnchor, constant: 12),
             buttonLock.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            buttonLock.widthAnchor.constraint(equalToConstant: 160),
-            buttonLock.heightAnchor.constraint(equalToConstant: 36),
+            buttonLock.widthAnchor.constraint(equalToConstant: 140),
+            buttonLock.heightAnchor.constraint(equalToConstant: 44), // Increased height for better touch target
             
-            scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 0),
-            scoreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 8),
+            scoreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             scoreLabel.heightAnchor.constraint(equalToConstant: 60),
             
             instructionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             instructionLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             instructionLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
-            instructionLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
+            instructionLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 80),
             
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: 0),
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            stack.bottomAnchor.constraint(equalTo: safeArea.bottomAnchor, constant: -20),
             stack.heightAnchor.constraint(equalToConstant: 80)
         ])
         
-        buttonPause.layer.cornerRadius = 12
         buttonPause.addTarget(self, action: #selector(tapPause), for: .touchUpInside)
-        buttonLock.layer.cornerRadius = 12
         buttonLock.addTarget(self, action: #selector(tapLock), for: .touchUpInside)
         buttonLeft.addTarget(self, action: #selector(tapButtonLeft), for: .touchUpInside)
         buttonRight.addTarget(self, action: #selector(tapButtonRight), for: .touchUpInside)
@@ -661,9 +649,10 @@ private extension GameViewController {
     /// Pre-configures materials for game objects.
     func setupMaterials() {
         wallMat.lightingModel = .physicallyBased
-        wallMat.diffuse.contents = UIColor(white: 0.2, alpha: 1.0)
-        wallMat.metalness.contents = 0.8
-        wallMat.roughness.contents = 0.2
+        // Deep midnight blue/purple to contrast and harmonize with neon blocks
+        wallMat.diffuse.contents = UIColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)
+        wallMat.metalness.contents = 0.9
+        wallMat.roughness.contents = 0.15
         wallMat.isDoubleSided = true
     }
 
@@ -677,7 +666,11 @@ private extension GameViewController {
         let info = names[blockType]!
         let material = blockScene.rootNode.childNode(withName: info.0, recursively: false)?.geometry?.material(named: info.1) ?? SCNMaterial()
         
+        let color = blockType.neonColor
+        
         material.lightingModel = .physicallyBased
+        material.diffuse.contents = color
+        material.emission.contents = color // Added for neon glow effect
         material.metalness.contents = 0.1
         material.roughness.contents = 0.3
         

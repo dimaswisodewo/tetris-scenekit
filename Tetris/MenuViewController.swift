@@ -18,9 +18,9 @@ class MenuViewController: UIViewController {
     
     private let titleLabel: UILabel = {
         let txt = UILabel()
-        txt.font = UIFont(name: "LuckiestGuy-Regular", size: 60)
-        txt.textAlignment = .right
-        txt.textColor = .white
+        txt.font = UIFont(name: "LuckiestGuy-Regular", size: 80)
+        txt.textAlignment = .center
+        txt.textColor = UIColor.white
         txt.text = "TETRIS"
         txt.backgroundColor = .clear
         txt.translatesAutoresizingMaskIntoConstraints = false
@@ -29,10 +29,11 @@ class MenuViewController: UIViewController {
     
     private let buttonPlay: UIButton = {
         let btn = UIButton(type: .roundedRect)
-        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 28)
         btn.setTitleColor(.white, for: .normal)
-        btn.setTitle("Play", for: .normal)
+        btn.setTitle("PLAY", for: .normal)
         btn.backgroundColor = .systemBlue
+        btn.layer.cornerRadius = 20
         btn.translatesAutoresizingMaskIntoConstraints = false
         return btn
     }()
@@ -49,7 +50,8 @@ class MenuViewController: UIViewController {
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
         lightNode.light!.type = .directional
-        lightNode.light!.intensity = 1000
+        lightNode.light!.intensity = 700 // Reduced intensity
+        lightNode.light!.color = UIColor(red: 0.8, green: 0.9, blue: 1.0, alpha: 1.0) // Pale cyan tone
         lightNode.light!.castsShadow = true
         lightNode.light!.shadowMode = .deferred
         lightNode.light!.shadowSampleCount = 16
@@ -62,15 +64,56 @@ class MenuViewController: UIViewController {
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
-        ambientLightNode.light!.color = UIColor(white: 0.4, alpha: 1.0)
+        // Dim indigo ambient to allow neon blocks to pop
+        ambientLightNode.light!.color = UIColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)
         gameScene.rootNode.addChildNode(ambientLightNode)
+
+        // Add colored accent lights for a cyberpunk feel
+        let magentaLight = SCNNode()
+        magentaLight.light = SCNLight()
+        magentaLight.light!.type = .omni
+        magentaLight.light!.color = UIColor.magenta
+        magentaLight.light!.intensity = 400
+        magentaLight.position = SCNVector3(x: -5, y: 5, z: 5)
+        gameScene.rootNode.addChildNode(magentaLight)
+
+        let cyanLight = SCNNode()
+        cyanLight.light = SCNLight()
+        cyanLight.light!.type = .omni
+        cyanLight.light!.color = UIColor.cyan
+        cyanLight.light!.intensity = 400
+        cyanLight.position = SCNVector3(x: 5, y: 5, z: 2)
+        gameScene.rootNode.addChildNode(cyanLight)
         
-        // Enhance materials with PBR (Physically Based Rendering) for a modern look
+        // Enhance materials with PBR (Physically Based Rendering) and apply neon colors
         gameScene.rootNode.enumerateChildNodes { (node, _) in
-            node.geometry?.materials.forEach { material in
-                material.lightingModel = .physicallyBased
-                material.metalness.contents = 0.1
-                material.roughness.contents = 0.3
+            if let geometry = node.geometry {
+                // Map node names to BlockType to get the neon colors
+                let nameToBlockType: [String: BlockType] = [
+                    "I": .hero, "J": .blueRicky, "L": .orangeRicky,
+                    "O": .smashboy, "S": .rhodeIslandZ, "T": .teewee, "Z": .clevelandZ
+                ]
+                
+                let blockType = nameToBlockType[node.name ?? ""]
+                let color = blockType?.neonColor
+                
+                geometry.materials.forEach { material in
+                    material.lightingModel = .physicallyBased
+                    if let neonColor = color {
+                        material.diffuse.contents = neonColor
+                        material.emission.contents = neonColor
+                        material.metalness.contents = 0.1
+                        material.roughness.contents = 0.3
+                    } else if node.name == "Field" {
+                        // Apply the same cyberpunk wall color as in the main game
+                        material.diffuse.contents = UIColor(red: 0.05, green: 0.05, blue: 0.15, alpha: 1.0)
+                        material.metalness.contents = 0.9
+                        material.roughness.contents = 0.15
+                    } else {
+                        material.metalness.contents = 0.1
+                        material.roughness.contents = 0.3
+                    }
+                }
             }
         }
         
@@ -113,13 +156,14 @@ class MenuViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             // Title: Positioned near the top
-            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 80),
-            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: 0),
-            // Play Button: Stretches across the bottom
-            buttonPlay.heightAnchor.constraint(equalToConstant: 80),
-            buttonPlay.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 0),
-            buttonPlay.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 0),
-            buttonPlay.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -safeAreaInsets.bottom - 32),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: safeAreaInsets.top + 100),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            // Play Button: Centered with padding
+            buttonPlay.heightAnchor.constraint(equalToConstant: 70),
+            buttonPlay.widthAnchor.constraint(equalToConstant: 240),
+            buttonPlay.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            buttonPlay.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -safeAreaInsets.bottom - 80),
         ])
     }
     
