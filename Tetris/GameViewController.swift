@@ -7,8 +7,9 @@
 
 import UIKit
 import SceneKit
+import ARKit
 
-class GameViewController: UIViewController, SCNSceneRendererDelegate {
+class GameViewController: UIViewController, ARSCNViewDelegate {
     enum Direction {
         case left, right, up, down
     }
@@ -40,6 +41,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         var col, row: Int
     }
     
+    enum GameState {
+        case tracking, placing, playing
+    }
+    
     // Game Constants
     private let blockHeight: Float = 0.4
     private let colCount = 10
@@ -49,6 +54,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     private let blockSpawnGridPos = GridPosition(col: 5, row: 22)
 
     // Game State
+    private var gameState: GameState = .tracking
+    private var isBoardLocked = false { didSet { buttonLock.setTitle(isBoardLocked ? "Unlock" : "Lock", for: .normal) } }
+    private var initialScale: SCNVector3 = SCNVector3(1, 1, 1)
+    private var initialEulerY: Float = 0
     private var lastUpdateTime: TimeInterval = 0
     private var fallAccumulator: TimeInterval = 0
     private var score = 0 { didSet { scoreLabel.text = "Score: \(score)" } }
@@ -65,6 +74,7 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     
     // Scene & Rendering
     private var gameScene: SCNScene!
+    private let boardNode = SCNNode()
     private let activeBlockNode = SCNNode()
     private var objectPool: [SCNNode] = []
     private let poolInitialCount = 200
@@ -79,6 +89,20 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         txt.backgroundColor = .clear
         txt.translatesAutoresizingMaskIntoConstraints = false
         return txt
+    }()
+    
+    private let instructionLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: "LuckiestGuy-Regular", size: 18)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        label.layer.cornerRadius = 12
+        label.clipsToBounds = true
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Initializing AR..."
+        label.numberOfLines = 0
+        return label
     }()
     
     private let buttonLeft: UIButton = {
@@ -122,6 +146,16 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         return btn
     }()
     
+    private let buttonLock: UIButton = {
+        let btn = UIButton(type: .roundedRect)
+        btn.titleLabel?.font = UIFont(name: "LuckiestGuy-Regular", size: 20)
+        btn.setTitleColor(.white, for: .normal)
+        btn.setTitle("Lock", for: .normal)
+        btn.backgroundColor = .systemGreen
+        btn.translatesAutoresizingMaskIntoConstraints = false
+        return btn
+    }()
+    
     private let wallMat = SCNMaterial()
     
     override func viewDidLoad() {
@@ -131,7 +165,21 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         setupMaterials()
         populatePool()
         generateField()
-        restart()
+        boardNode.isHidden = true
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let configuration = ARWorldTrackingConfiguration()
+        configuration.planeDetection = .horizontal
+        let arView = self.view as! ARSCNView
+        arView.session.run(configuration)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        let arView = self.view as! ARSCNView
+        arView.session.pause()
     }
     
     private func restart() {
@@ -158,7 +206,10 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let deltaTime = time - lastUpdateTime
         lastUpdateTime = time
         
-        guard !isPaused, !isOver else { return }
+        guard gameState == .playing, !isPaused, !isOver else {
+            updateInstructions()
+            return
+        }
         
         fallAccumulator += deltaTime
         let currentFallSpeed = max(0.1, 1.0 * pow(0.85, Double(level)))
@@ -179,6 +230,26 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
                         playSFX(.gameOver)
                     }
                 }
+            }
+        }
+    }
+
+    private func updateInstructions() {
+        DispatchQueue.main.async {
+            switch self.gameState {
+            case .tracking:
+                let arView = self.view as! ARSCNView
+                if let _ = arView.session.currentFrame?.anchors.compactMap({ $0 as? ARPlaneAnchor }).first(where: { $0.alignment == .horizontal }) {
+                    self.gameState = .placing
+                    self.instructionLabel.text = "Tap to place the board"
+                } else {
+                    self.instructionLabel.text = "Move camera to find a flat surface"
+                }
+            case .placing:
+                self.instructionLabel.text = "Tap to place the board"
+            case .playing:
+                self.instructionLabel.text = ""
+                self.instructionLabel.isHidden = true
             }
         }
     }
@@ -227,9 +298,9 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
         let offsets = activeBlockType.positions(for: activeBlockRotation)
         for (index, node) in activeBlockNode.childNodes.enumerated() {
             let pos = GridPosition(col: activeBlockGridPos.col + offsets[index].col, row: activeBlockGridPos.row + offsets[index].row)
-            node.transform = node.convertTransform(SCNMatrix4Identity, to: gameScene.rootNode)
+            node.transform = node.convertTransform(SCNMatrix4Identity, to: boardNode)
             node.removeFromParentNode()
-            gameScene.rootNode.addChildNode(node)
+            boardNode.addChildNode(node)
             board[pos] = node
         }
         checkForClearance()
@@ -278,7 +349,22 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
     
     // MARK: - Interaction Handlers
     
-    @objc func handleTap(_ gestureRecognize: UIGestureRecognizer) {
+    @objc func handleTap(_ gestureRecognize: UITapGestureRecognizer) {
+        if gameState == .placing {
+            let arView = self.view as! ARSCNView
+            let location = gestureRecognize.location(in: arView)
+            
+            let raycastQuery = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .horizontal)
+            if let query = raycastQuery, let result = arView.session.raycast(query).first {
+                boardNode.simdTransform = result.worldTransform
+                boardNode.scale = SCNVector3(0.3, 0.3, 0.3)
+                boardNode.isHidden = false
+                gameState = .playing
+                restart()
+            }
+            return
+        }
+        
         guard !isPaused, !isOver else { return }
         if gestureRecognize.state == .ended {
             let nextRotation = activeBlockRotation.next
@@ -286,6 +372,30 @@ class GameViewController: UIViewController, SCNSceneRendererDelegate {
                 moveActiveBlock(to: activeBlockGridPos, rotation: nextRotation)
             }
         }
+    }
+
+    @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        guard !isBoardLocked, gameState == .playing else { return }
+        if gesture.state == .began {
+            initialScale = boardNode.scale
+        } else if gesture.state == .changed {
+            let scale = Float(gesture.scale)
+            boardNode.scale = SCNVector3(initialScale.x * scale, initialScale.y * scale, initialScale.z * scale)
+        }
+    }
+
+    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+        guard !isBoardLocked, gameState == .playing else { return }
+        let translation = gesture.translation(in: gesture.view)
+        if gesture.state == .began {
+            initialEulerY = boardNode.eulerAngles.y
+        } else if gesture.state == .changed {
+            boardNode.eulerAngles.y = initialEulerY + Float(translation.x) * 0.01
+        }
+    }
+
+    @objc private func tapLock() {
+        isBoardLocked.toggle()
     }
 
     @objc private func tapPause() {
@@ -357,15 +467,19 @@ private extension GameViewController {
         ambientLightNode.light!.color = UIColor.darkGray
         gameScene.rootNode.addChildNode(ambientLightNode)
         
-        let scnView = self.view as! SCNView
-        scnView.scene = gameScene
-        scnView.allowsCameraControl = false
-        scnView.backgroundColor = .black
-        scnView.delegate = self
-        scnView.isPlaying = true
+        let arView = self.view as! ARSCNView
+        arView.scene = gameScene
+        arView.delegate = self
+        arView.allowsCameraControl = false
+        arView.backgroundColor = .black
+        arView.isPlaying = true
         
-        gameScene.rootNode.addChildNode(activeBlockNode)
-        scnView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap(_:))))
+        gameScene.rootNode.addChildNode(boardNode)
+        boardNode.addChildNode(activeBlockNode)
+        
+        arView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(handleTap(_:))))
+        arView.addGestureRecognizer(UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:))))
+        arView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:))))
     }
 
     func setupUI() {
@@ -375,7 +489,9 @@ private extension GameViewController {
         stack.distribution = .fillEqually
         view.addSubview(stack)
         view.addSubview(buttonPause)
+        view.addSubview(buttonLock)
         view.addSubview(scoreLabel)
+        view.addSubview(instructionLabel)
         
         NSLayoutConstraint.activate([
             buttonPause.centerYAnchor.constraint(equalTo: scoreLabel.centerYAnchor, constant: -8),
@@ -383,9 +499,19 @@ private extension GameViewController {
             buttonPause.widthAnchor.constraint(equalToConstant: 100),
             buttonPause.heightAnchor.constraint(equalToConstant: 36),
             
+            buttonLock.topAnchor.constraint(equalTo: buttonPause.bottomAnchor, constant: 12),
+            buttonLock.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            buttonLock.widthAnchor.constraint(equalToConstant: 100),
+            buttonLock.heightAnchor.constraint(equalToConstant: 36),
+            
             scoreLabel.topAnchor.constraint(equalTo: safeArea.topAnchor, constant: 36),
             scoreLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             scoreLabel.heightAnchor.constraint(equalToConstant: 60),
+            
+            instructionLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            instructionLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            instructionLabel.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            instructionLabel.heightAnchor.constraint(greaterThanOrEqualToConstant: 50),
             
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor),
@@ -395,13 +521,14 @@ private extension GameViewController {
         
         buttonPause.layer.cornerRadius = 12
         buttonPause.addTarget(self, action: #selector(tapPause), for: .touchUpInside)
+        buttonLock.layer.cornerRadius = 12
+        buttonLock.addTarget(self, action: #selector(tapLock), for: .touchUpInside)
         buttonLeft.addTarget(self, action: #selector(tapButtonLeft), for: .touchUpInside)
         buttonRight.addTarget(self, action: #selector(tapButtonRight), for: .touchUpInside)
         buttonDown.addTarget(self, action: #selector(tapButtonDown), for: .touchUpInside)
     }
 
     func setupMaterials() {
-        // Cache materials would be better, but keeping it simple for now as per logic
         wallMat.diffuse.contents = UIColor.darkGray
         wallMat.diffuse.intensity = 0.1
         wallMat.isDoubleSided = true
@@ -443,7 +570,7 @@ private extension GameViewController {
         let field = scene.rootNode.childNode(withName: "Field", recursively: false)!
         field.position = SCNVector3(-0.2, 0, 0)
         field.childNodes.first?.geometry?.materials = [wallMat]
-        gameScene.rootNode.addChildNode(field)
+        boardNode.addChildNode(field)
     }
     
     func calculateScore(numOfRowsCleared: Int) {
@@ -458,7 +585,12 @@ private extension GameViewController {
 
     func showGameOverAlert() {
         let alert = UIAlertController(title: "Game Over", message: "You got \(score) points!", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Restart", style: .default) { _ in self.restart() })
+        alert.addAction(UIAlertAction(title: "Restart", style: .default) { _ in 
+            self.gameState = .placing
+            self.boardNode.isHidden = true
+            self.instructionLabel.isHidden = false
+            self.restart() 
+        })
         alert.addAction(UIAlertAction(title: "Back to Menu", style: .destructive) { _ in
             let storyBoard = UIStoryboard(name: "Main", bundle: nil)
             let vc = storyBoard.instantiateViewController(withIdentifier: "MenuViewController")
