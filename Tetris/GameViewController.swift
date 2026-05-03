@@ -363,6 +363,8 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             boardNode.addChildNode(node)
             board[pos] = node
         }
+        
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
         checkForClearance()
     }
 
