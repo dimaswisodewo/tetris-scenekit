@@ -43,16 +43,32 @@ class MenuViewController: UIViewController {
         // create and add a light to the scene
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
-        lightNode.light!.type = .omni
-        lightNode.position = SCNVector3(x: 0, y: 21, z: 10)
+        lightNode.light!.type = .directional
+        lightNode.light!.intensity = 1000
+        lightNode.light!.castsShadow = true
+        lightNode.light!.shadowMode = .deferred
+        lightNode.light!.shadowSampleCount = 16
+        lightNode.light!.shadowRadius = 8.0
+        lightNode.light!.shadowColor = UIColor.black.withAlphaComponent(0.6)
+        lightNode.position = SCNVector3(x: 0, y: 10, z: 10)
+        lightNode.eulerAngles = SCNVector3(-Float.pi / 3, Float.pi / 4, 0)
         gameScene.rootNode.addChildNode(lightNode)
         
         // create and add an ambient light to the scene
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
-        ambientLightNode.light!.color = UIColor.darkGray
+        ambientLightNode.light!.color = UIColor(white: 0.4, alpha: 1.0)
         gameScene.rootNode.addChildNode(ambientLightNode)
+        
+        // Upgrade materials to PBR
+        gameScene.rootNode.enumerateChildNodes { (node, _) in
+            node.geometry?.materials.forEach { material in
+                material.lightingModel = .physicallyBased
+                material.metalness.contents = 0.1
+                material.roughness.contents = 0.3
+            }
+        }
         
         // retrieve the SCNView
         let scnView = self.view as! SCNView

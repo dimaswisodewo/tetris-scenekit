@@ -457,14 +457,21 @@ private extension GameViewController {
         
         let lightNode = SCNNode()
         lightNode.light = SCNLight()
-        lightNode.light!.type = .omni
-        lightNode.position = SCNVector3(x: 0, y: 21, z: 10)
+        lightNode.light!.type = .directional
+        lightNode.light!.intensity = 1000
+        lightNode.light!.castsShadow = true
+        lightNode.light!.shadowMode = .deferred
+        lightNode.light!.shadowSampleCount = 16
+        lightNode.light!.shadowRadius = 8.0
+        lightNode.light!.shadowColor = UIColor.black.withAlphaComponent(0.6)
+        lightNode.position = SCNVector3(x: 0, y: 10, z: 10)
+        lightNode.eulerAngles = SCNVector3(-Float.pi / 3, Float.pi / 4, 0)
         gameScene.rootNode.addChildNode(lightNode)
         
         let ambientLightNode = SCNNode()
         ambientLightNode.light = SCNLight()
         ambientLightNode.light!.type = .ambient
-        ambientLightNode.light!.color = UIColor.darkGray
+        ambientLightNode.light!.color = UIColor(white: 0.4, alpha: 1.0)
         gameScene.rootNode.addChildNode(ambientLightNode)
         
         let arView = self.view as! ARSCNView
@@ -529,8 +536,10 @@ private extension GameViewController {
     }
 
     func setupMaterials() {
-        wallMat.diffuse.contents = UIColor.darkGray
-        wallMat.diffuse.intensity = 0.1
+        wallMat.lightingModel = .physicallyBased
+        wallMat.diffuse.contents = UIColor(white: 0.2, alpha: 1.0)
+        wallMat.metalness.contents = 0.8
+        wallMat.roughness.contents = 0.2
         wallMat.isDoubleSided = true
     }
 
@@ -541,7 +550,13 @@ private extension GameViewController {
             .hero: ("I", "Cyan"), .rhodeIslandZ: ("S", "Green"), .clevelandZ: ("Z", "Red"), .orangeRicky: ("L", "Orange")
         ]
         let info = names[blockType]!
-        return blockScene.rootNode.childNode(withName: info.0, recursively: false)?.geometry?.material(named: info.1) ?? SCNMaterial()
+        let material = blockScene.rootNode.childNode(withName: info.0, recursively: false)?.geometry?.material(named: info.1) ?? SCNMaterial()
+        
+        material.lightingModel = .physicallyBased
+        material.metalness.contents = 0.1
+        material.roughness.contents = 0.3
+        
+        return material
     }
 
     func populatePool() {
@@ -571,6 +586,33 @@ private extension GameViewController {
         field.position = SCNVector3(-0.2, 0, 0)
         field.childNodes.first?.geometry?.materials = [wallMat]
         boardNode.addChildNode(field)
+        
+        // Add a soft blurred circle shadow below the field
+        let shadowSize: CGFloat = 4.0
+        let shadowPlane = SCNPlane(width: shadowSize, height: shadowSize)
+        
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 128, height: 128))
+        let blurredImage = renderer.image { ctx in
+            let center = CGPoint(x: 64, y: 64)
+            let colorSpace = CGColorSpaceCreateDeviceRGB()
+            let colors = [UIColor(white: 0, alpha: 0.8).cgColor, UIColor(white: 0, alpha: 0.0).cgColor] as CFArray
+            if let gradient = CGGradient(colorsSpace: colorSpace, colors: colors, locations: [0.0, 1.0]) {
+                ctx.cgContext.drawRadialGradient(gradient, startCenter: center, startRadius: 0, endCenter: center, endRadius: 64, options: [])
+            }
+        }
+        
+        let shadowMaterial = SCNMaterial()
+        shadowMaterial.diffuse.contents = blurredImage
+        shadowMaterial.lightingModel = .constant
+        shadowMaterial.writesToDepthBuffer = false
+        shadowMaterial.isDoubleSided = true
+        shadowPlane.materials = [shadowMaterial]
+        
+        let shadowNode = SCNNode(geometry: shadowPlane)
+        shadowNode.eulerAngles.x = -.pi / 2
+        shadowNode.position = SCNVector3(-0.2, 0.01, -0.2)
+        shadowNode.castsShadow = false
+        boardNode.addChildNode(shadowNode)
     }
     
     func calculateScore(numOfRowsCleared: Int) {
