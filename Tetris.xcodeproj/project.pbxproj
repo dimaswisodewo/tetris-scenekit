@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0B02A3312FA8C983002644AD /* GameOver.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0B02A3302FA8C983002644AD /* GameOver.wav */; };
+		0B02A3352FA8CBA3002644AD /* BGM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 0B02A3342FA8CBA3002644AD /* BGM.mp3 */; };
+		0B02A3372FA8CDF1002644AD /* Clear.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0B02A3362FA8CDF1002644AD /* Clear.wav */; };
+		0B02A3392FA8D4E7002644AD /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 0B02A3382FA8D4E7002644AD /* AppIcon.icon */; };
 		2B2F9E9E2C23F01800267E45 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2F9E9D2C23F01800267E45 /* AppDelegate.swift */; };
 		2B2F9EA02C23F01800267E45 /* art.scnassets in Resources */ = {isa = PBXBuildFile; fileRef = 2B2F9E9F2C23F01800267E45 /* art.scnassets */; };
 		2B2F9EA22C23F01800267E45 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B2F9EA12C23F01800267E45 /* GameViewController.swift */; };
@@ -16,13 +20,14 @@
 		2BCC0B1F2C2C18E400B4F52E /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */; };
 		2BCC0B232C2C21D600B4F52E /* BlockPositions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */; };
 		2BCC0B252C2C220A00B4F52E /* GameSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BCC0B242C2C220A00B4F52E /* GameSounds.swift */; };
-		3823C2E82C3E9885008242D7 /* BGM.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E52C3E9885008242D7 /* BGM.mp3 */; };
-		3823C2E92C3E9885008242D7 /* Clear.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E62C3E9885008242D7 /* Clear.mp3 */; };
-		3823C2EA2C3E9885008242D7 /* GameOver.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2E72C3E9885008242D7 /* GameOver.mp3 */; };
 		3823C2EC2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3823C2EB2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0B02A3302FA8C983002644AD /* GameOver.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = GameOver.wav; sourceTree = "<group>"; };
+		0B02A3342FA8CBA3002644AD /* BGM.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = BGM.mp3; sourceTree = "<group>"; };
+		0B02A3362FA8CDF1002644AD /* Clear.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = Clear.wav; sourceTree = "<group>"; };
+		0B02A3382FA8D4E7002644AD /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = AppIcon.icon; sourceTree = "<group>"; };
 		2B2F9E9A2C23F01800267E45 /* Tetris.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tetris.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2B2F9E9D2C23F01800267E45 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		2B2F9E9F2C23F01800267E45 /* art.scnassets */ = {isa = PBXFileReference; lastKnownFileType = wrapper.scnassets; path = art.scnassets; sourceTree = "<group>"; };
@@ -34,9 +39,6 @@
 		2BCC0B1E2C2C18E400B4F52E /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		2BCC0B222C2C21D600B4F52E /* BlockPositions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockPositions.swift; sourceTree = "<group>"; };
 		2BCC0B242C2C220A00B4F52E /* GameSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSounds.swift; sourceTree = "<group>"; };
-		3823C2E52C3E9885008242D7 /* BGM.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = BGM.mp3; sourceTree = "<group>"; };
-		3823C2E62C3E9885008242D7 /* Clear.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = Clear.mp3; sourceTree = "<group>"; };
-		3823C2E72C3E9885008242D7 /* GameOver.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = GameOver.mp3; sourceTree = "<group>"; };
 		3823C2EB2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "LuckiestGuy-Regular.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,6 +84,7 @@
 				2B2F9EA32C23F01800267E45 /* Main.storyboard */,
 				2B2F9EA62C23F01B00267E45 /* Assets.xcassets */,
 				2B2F9EA82C23F01B00267E45 /* LaunchScreen.storyboard */,
+				0B02A3382FA8D4E7002644AD /* AppIcon.icon */,
 			);
 			path = Tetris;
 			sourceTree = "<group>";
@@ -97,9 +100,9 @@
 		2BCC0B172C2BD0BF00B4F52E /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
-				3823C2E52C3E9885008242D7 /* BGM.mp3 */,
-				3823C2E62C3E9885008242D7 /* Clear.mp3 */,
-				3823C2E72C3E9885008242D7 /* GameOver.mp3 */,
+				0B02A3302FA8C983002644AD /* GameOver.wav */,
+				0B02A3342FA8CBA3002644AD /* BGM.mp3 */,
+				0B02A3362FA8CDF1002644AD /* Clear.wav */,
 			);
 			path = Sounds;
 			sourceTree = "<group>";
@@ -164,12 +167,13 @@
 			files = (
 				2B2F9EA02C23F01800267E45 /* art.scnassets in Resources */,
 				2B2F9EAA2C23F01B00267E45 /* LaunchScreen.storyboard in Resources */,
+				0B02A3392FA8D4E7002644AD /* AppIcon.icon in Resources */,
 				3823C2EC2C3E98A1008242D7 /* LuckiestGuy-Regular.ttf in Resources */,
-				3823C2EA2C3E9885008242D7 /* GameOver.mp3 in Resources */,
-				3823C2E92C3E9885008242D7 /* Clear.mp3 in Resources */,
+				0B02A3352FA8CBA3002644AD /* BGM.mp3 in Resources */,
+				0B02A3312FA8C983002644AD /* GameOver.wav in Resources */,
 				2B2F9EA72C23F01B00267E45 /* Assets.xcassets in Resources */,
-				3823C2E82C3E9885008242D7 /* BGM.mp3 in Resources */,
 				2B2F9EA52C23F01800267E45 /* Main.storyboard in Resources */,
+				0B02A3372FA8CDF1002644AD /* Clear.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,19 +343,25 @@
 				DEVELOPMENT_TEAM = A2WQZ32XVK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tetris/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tetris AR";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ARKit is required for augmented reality Tetris gameplay.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dimaswisodewo.Tetris;
+				PRODUCT_BUNDLE_IDENTIFIER = dimaswisodewo.TetrisAR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -368,19 +378,25 @@
 				DEVELOPMENT_TEAM = A2WQZ32XVK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Tetris/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Tetris AR";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
+				INFOPLIST_KEY_NSCameraUsageDescription = "ARKit is required for augmented reality Tetris gameplay.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dimaswisodewo.Tetris;
+				PRODUCT_BUNDLE_IDENTIFIER = dimaswisodewo.TetrisAR;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

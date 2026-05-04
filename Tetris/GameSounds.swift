@@ -33,8 +33,8 @@ func setupSounds() {
     
     // Locate sound resources in the main bundle
     guard let bgmPath = Bundle.main.path(forResource: "BGM", ofType: "mp3"),
-          let clearPath = Bundle.main.path(forResource: "Clear", ofType: "mp3"),
-          let gameOverPath = Bundle.main.path(forResource: "GameOver", ofType: "mp3")
+          let clearPath = Bundle.main.path(forResource: "Clear", ofType: "wav"),
+          let gameOverPath = Bundle.main.path(forResource: "GameOver", ofType: "wav")
     else {
         print("Error: Could not find sound files in bundle.")
         return

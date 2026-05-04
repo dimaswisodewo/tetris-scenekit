@@ -453,7 +453,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             let raycastQuery = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .horizontal)
             if let query = raycastQuery, let result = arView.session.raycast(query).first {
                 boardNode.simdTransform = result.worldTransform
-                boardNode.scale = SCNVector3(0.1, 0.1, 0.1)
+                boardNode.scale = SCNVector3(0.2, 0.2, 0.2)
                 boardNode.isHidden = false
                 gameState = .playing
                 instructionLabel.isHidden = true
