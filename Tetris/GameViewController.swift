@@ -233,12 +233,14 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
                     // Final check: can it still NOT move down?
                     if !self.canMove(to: GridPosition(col: self.activeBlockGridPos.col, row: self.activeBlockGridPos.row - 1), rotation: self.activeBlockRotation) {
                         self.placeBlockOnField()
-                        self.generateRandomBlock()
-                        self.isLocking = false
-                        self.lockDelayAccumulator = 0
-                        self.fallAccumulator = 0 // Reset gravity for the new block
                         
-                        if self.isGameOver() {
+                        // Check if the next block can be spawned at the top
+                        if self.canMove(self.nextBlockType, to: self.blockSpawnGridPos, rotation: .position1) {
+                            self.generateRandomBlock()
+                            self.isLocking = false
+                            self.lockDelayAccumulator = 0
+                            self.fallAccumulator = 0 // Reset gravity for the new block
+                        } else {
                             self.isOver = true
                             self.activeBlockNode.isHidden = true
                             self.showGameOverAlert()
@@ -302,13 +304,15 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
 
     // MARK: - Core Game Logic
     
-    /// Checks if the active block can move to the specified grid position and rotation.
+    /// Checks if a block can move to the specified grid position and rotation.
     /// - Parameters:
+    ///   - type: The block type to check. If nil, uses the current active block.
     ///   - pos: The target anchor grid position.
     ///   - rotation: The target rotation state.
     /// - Returns: True if the movement is valid (no collisions and within bounds).
-    private func canMove(to pos: GridPosition, rotation: BlockPosition) -> Bool {
-        for offset in activeBlockType.positions(for: rotation) {
+    private func canMove(_ type: BlockType? = nil, to pos: GridPosition, rotation: BlockPosition) -> Bool {
+        let blockType = type ?? activeBlockType
+        for offset in blockType.positions(for: rotation) {
             let col = pos.col + offset.col
             let row = pos.row + offset.row
             
@@ -431,11 +435,6 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
         playSFX(.clearance)
     }
 
-    /// Checks if the current state is a Game Over.
-    private func isGameOver() -> Bool {
-        return !canMove(to: activeBlockGridPos, rotation: activeBlockRotation)
-    }
-
     /// Converts a grid coordinate to a 3D world space coordinate relative to the board.
     private func gridToWorld(_ pos: GridPosition) -> SCNVector3 {
         return SCNVector3(Float(pos.col - 1) * blockHeight + minPosX, Float(pos.row) * blockHeight, 0)
@@ -454,7 +453,7 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
             let raycastQuery = arView.raycastQuery(from: location, allowing: .estimatedPlane, alignment: .horizontal)
             if let query = raycastQuery, let result = arView.session.raycast(query).first {
                 boardNode.simdTransform = result.worldTransform
-                boardNode.scale = SCNVector3(0.3, 0.3, 0.3)
+                boardNode.scale = SCNVector3(0.1, 0.1, 0.1)
                 boardNode.isHidden = false
                 gameState = .playing
                 instructionLabel.isHidden = true
@@ -529,15 +528,22 @@ class GameViewController: UIViewController, ARSCNViewDelegate {
     @objc private func tapButtonDown() {
         guard !isOver, !isPaused else { return }
         var nextPos = activeBlockGridPos
+        var moved = false
         while canMove(to: GridPosition(col: nextPos.col, row: nextPos.row - 1), rotation: activeBlockRotation) {
             nextPos.row -= 1
             score += 1 // Bonus points for hard drop
+            moved = true
         }
-        moveActiveBlock(to: nextPos)
         
-        // Start the locking phase instead of instant lock
-        isLocking = true
-        lockDelayAccumulator = 0
+        if moved {
+            moveActiveBlock(to: nextPos)
+            lockDelayAccumulator = 0
+        }
+        
+        // Ensure isLocking is true if we are at the bottom
+        if !canMove(to: GridPosition(col: activeBlockGridPos.col, row: activeBlockGridPos.row - 1), rotation: activeBlockRotation) {
+            isLocking = true
+        }
     }
 
     #if DEBUG
